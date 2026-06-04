@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>한자 1급</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg:      #f7f6f2;
+  --white:   #ffffff;
+  --text:    #111110;
+  --text2:   #5a5850;
+  --text3:   #a0998c;
+  --border:  #e4e2d8;
+  --cobalt:  #4272b8;
+  --terra:   #c25a38;
+  --mustard: #c09020;
+  --mint:    #2ea882;
+  --sage:    #6e9660;
+  --olive:   #848c38;
+  --forest:  #286850;
+  --teal:    #288888;
+  --radius:  20px;
+  --radius-sm: 12px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  overflow: hidden;
+}
+
+/* ── 전체 레이아웃 ── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+/* ── 헤더 ── */
+.header {
+  padding: 20px 24px 12px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.header-count {
+  font-size: 12px;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+}
+
+/* ── 스크롤 영역 ── */
+.scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 24px 120px;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-body::-webkit-scrollbar { display: none; }
+
+/* ── 홈: 덱 카드 ── */
+.home-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.deck-list { display: flex; flex-direction: column; gap: 10px; }
+
+.deck-item {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.deck-item:active { transform: scale(0.98); box-shadow: none; }
+
+.deck-dot {
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.deck-info { flex: 1; min-width: 0; }
+.deck-name { font-size: 15px; font-weight: 700; }
+.deck-sub  { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.deck-count {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--text3);
+  flex-shrink: 0;
+}
+
+/* ── 카드 뷰 ── */
+.card-view { display: flex; flex-direction: column; gap: 14px; }
+
+/* 플립 카드 */
+.flip-wrap {
+  perspective: 1400px;
+  height: 280px;
+  cursor: pointer;
+}
+.flip-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.flip-wrap.flipped .flip-inner { transform: rotateY(180deg); }
+.flip-front, .flip-back {
+  position: absolute; width: 100%; height: 100%;
+  backface-visibility: hidden;
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 28px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.flip-back { transform: rotateY(180deg); }
+
+/* 한자 크게 */
+.char-xl {
+  font-family: 'Playfair Display', serif;
+  font-size: 96px;
+  line-height: 1;
+  font-weight: 400;
+}
+.card-question { font-size: 13px; color: var(--text3); }
+.card-tap { font-size: 11px; color: var(--text3); text-align: right; }
+
+.back-char {
+  font-family: 'Playfair Display', serif;
+  font-size: 52px;
+  line-height: 1;
+}
+.back-sound { font-size: 26px; font-weight: 700; margin-top: 6px; }
+.back-rows { display: flex; flex-direction: column; gap: 5px; }
+.back-row { font-size: 12px; color: var(--text2); display: flex; gap: 8px; }
+.back-label { color: var(--text3); min-width: 30px; }
+
+/* 배지 */
+.badge-row { display: flex; gap: 5px; flex-wrap: wrap; }
+.badge {
+  font-size: 9px; font-weight: 700;
+  padding: 3px 8px; border-radius: 20px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+
+/* ── 일반 카드 (비플립) ── */
+.plain-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+.plain-card-head {
+  padding: 20px 22px 14px;
+}
+.plain-card-body { padding: 0 22px 20px; }
+
+/* 사자성어 */
+.idiom-chars {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  line-height: 1.2;
+}
+.blank-sq {
+  display: inline-block;
+  width: 38px; height: 38px;
+  border-radius: 8px;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+.idiom-meaning { font-size: 13px; color: var(--text2); margin-top: 10px; line-height: 1.6; }
+
+/* 객관식 그리드 */
+.choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.choice-btn {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  padding: 14px 8px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.choice-btn:active { transform: scale(0.96); }
+.choice-btn.correct { border-color: var(--mint); background: #e0f5ee; color: var(--forest); }
+.choice-btn.wrong   { border-color: var(--terra); background: #faeae6; color: var(--terra); }
+
+/* 유의어 한자들 */
+.yuuii-chars {
+  display: flex; gap: 20px;
+  justify-content: center; flex-wrap: wrap;
+  padding: 16px 0;
+}
+.yuuii-char-item { text-align: center; }
+.yuuii-char-big {
+  font-family: 'Playfair Display', serif;
+  font-size: 54px;
+  line-height: 1;
+  display: block;
+}
+.yuuii-char-sound { font-size: 12px; color: var(--text3); margin-top: 4px; display: block; }
+
+/* 객관식 텍스트형 */
+.choice-btn-text {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  width: 100%;
+  display: block;
+  margin-bottom: 7px;
+  font-weight: 500;
+}
+.choice-btn-text:active { transform: scale(0.98); }
+.choice-btn-text.correct { border-color: var(--mint); background: #e0f5ee; color: var(--forest); }
+.choice-btn-text.wrong   { border-color: var(--terra); background: #faeae6; color: var(--terra); }
+
+/* 혼동표기 그리드 */
+.confused-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.hcell { padding: 14px 16px; background: var(--white); }
+.hcell.ok { background: #e8f5ee; }
+.hcell.ng { background: #faeae6; }
+.hcell-char {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px; line-height: 1;
+}
+.hcell-char.ok { color: var(--forest); }
+.hcell-char.ng { color: var(--terra); text-decoration: line-through; }
+.hcell-sound { font-size: 12px; font-weight: 500; margin-top: 3px; }
+.hcell-sound.ok { color: var(--mint); }
+.hcell-sound.ng { color: var(--terra); }
+.hcell-info { font-size: 11px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
+.hcell-note {
+  font-size: 10px; padding: 2px 7px; border-radius: 10px;
+  display: inline-block; margin-top: 5px; font-weight: 500;
+}
+.hcell-note.ok { background: #b8e8d0; color: var(--forest); }
+.hcell-note.ng { background: #f0c8c0; color: var(--terra); }
+
+/* 상대어 */
+.ant-pair {
+  display: flex; align-items: center;
+  gap: 12px; padding: 16px 0;
+}
+.ant-word { flex: 1; }
+.ant-hanja {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+}
+.ant-read { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.ant-meaning { font-size: 11px; color: var(--text3); }
+.ant-arrow { font-size: 18px; color: var(--text3); }
+
+/* 다음자 */
+.multi-char-hero {
+  font-family: 'Playfair Display', serif;
+  font-size: 80px; line-height: 1;
+}
+.multi-rows { display: flex; flex-direction: column; gap: 8px; }
+.multi-row {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+}
+.multi-sound { font-size: 15px; font-weight: 700; }
+.multi-words { font-size: 11px; color: var(--text2); margin-top: 3px; line-height: 1.6; }
+
+/* 빈칸 */
+.blank-hero {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px; font-weight: 700;
+}
+.blank-meaning-text { font-size: 14px; color: var(--text2); margin-top: 4px; }
+.blank-ex-list { display: flex; flex-direction: column; gap: 8px; }
+.blank-ex-row { display: flex; gap: 12px; font-size: 13px; color: var(--text2); }
+.blank-ex-key { font-weight: 700; color: var(--text); min-width: 80px; }
+
+/* 독해 문장 */
+.dokhai-sentence {
+  font-size: 15px; line-height: 1.9; color: var(--text2);
+}
+.dokhai-hl {
+  color: var(--text); font-weight: 700;
+  background: #f0e8d8; padding: 1px 4px; border-radius: 4px;
+}
+.dokhai-answer {
+  font-family: 'Playfair Display', serif;
+  font-size: 40px; color: var(--text);
+}
+.dokhai-read { font-size: 20px; font-weight: 700; margin-top: 4px; }
+.dokhai-meaning { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+/* 설명 박스 */
+.explain {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 12px; color: var(--text2); line-height: 1.7;
+}
+.explain strong { color: var(--text); font-weight: 700; }
+
+/* ── 하단 탭바 ── */
+.tabbar {
+  position: fixed;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 8px 0 max(env(safe-area-inset-bottom), 8px);
+  z-index: 100;
+}
+.tabbar-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 3px;
+  cursor: pointer; padding: 4px 0;
+  transition: opacity 0.1s;
+}
+.tabbar-item:active { opacity: 0.6; }
+.tab-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; transition: all 0.15s;
+}
+.tab-icon.active-icon {
+  color: var(--white) !important;
+}
+.tab-label {
+  font-size: 9px; font-weight: 500;
+  color: var(--text3); letter-spacing: 0.02em;
+  transition: color 0.15s;
+}
+.tab-label.active-label { color: var(--text); font-weight: 700; }
+
+/* ── 카드 하단 버튼 ── */
+.card-btns {
+  display: flex; gap: 8px; align-items: center;
+}
+.btn {
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  padding: 11px 18px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text);
+  cursor: pointer; font-family: inherit;
+  transition: all 0.12s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.btn:active { transform: scale(0.97); box-shadow: none; }
+.btn.primary {
+  flex: 1;
+  color: var(--white);
+  border-color: transparent;
+}
+.btn-bm {
+  font-size: 16px;
+  padding: 11px 14px;
+}
+.btn-shuffle { font-size: 16px; padding: 11px 14px; }
+
+.prog {
+  text-align: center;
+  font-size: 11px; color: var(--text3);
+  letter-spacing: 0.04em;
+}
+
+/* ── 섹션 헤더 (카드뷰 상단) ── */
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.section-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%; flex-shrink: 0;
+}
+.section-title {
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.section-total {
+  margin-left: auto;
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; color: var(--text3);
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-title">漢字 1級</div>
+    <div class="header-count" id="headerCount">덱 선택</div>
+  </div>
+  <div class="scroll-body" id="scrollBody">
+    <!-- content here -->
+  </div>
+</div>
+
+<!-- 하단 탭바 -->
+<div class="tabbar" id="tabbar"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════
+const DECKS = {
+yumhun: {
+  name: '1영역 · 음훈',
+  color: '#4272b8',
+  sub: '복기본+기출 전체 한자',
+  cards: [
+    {char:'晦',sound:'회',meaning:'그믐',radical:'日',note:'黃昏(황혼)과 구별',sources:['복기본']},
+    {char:'闕',sound:'궐',meaning:'대궐',radical:'門',note:'宮闕(궁궐)',sources:['복기본']},
+    {char:'箸',sound:'저',meaning:'젓가락',radical:'竹',note:'著(저=나타나다)와 혼동 주의',sources:['복기본']},
+    {char:'辯',sound:'변',meaning:'말 잘할',radical:'言',note:'辯論(변론)',sources:['복기본']},
+    {char:'叩',sound:'고',meaning:'두드릴',radical:'口',note:'叩頭(고두)=머리를 조아림',sources:['복기본']},
+    {char:'贖',sound:'속',meaning:'속죄할',radical:'貝',note:'贖罪(속죄)',sources:['복기본']},
+    {char:'麵',sound:'면',meaning:'밀가루·국수',radical:'麥',note:'麵類(면류)',sources:['복기본']},
+    {char:'彫',sound:'조',meaning:'새길',radical:'彡',note:'彫刻(조각)',sources:['복기본']},
+    {char:'盂',sound:'우',meaning:'사발',radical:'皿',note:'盂蘭盆(우란분)',sources:['복기본']},
+    {char:'鞭',sound:'편',meaning:'채찍',radical:'革',note:'鞭撻(편달)',sources:['복기본']},
+    {char:'砥',sound:'지',meaning:'숫돌',radical:'石',note:'砥礪(지려)=연마',sources:['복기본']},
+    {char:'址',sound:'지',meaning:'터',radical:'土',note:'住址(주지)=주소',sources:['복기본']},
+    {char:'扇',sound:'선',meaning:'부채',radical:'戶',note:'扇風機(선풍기)',sources:['복기본']},
+    {char:'窄',sound:'착',meaning:'좁을',radical:'穴',note:'狹窄(협착)',sources:['복기본']},
+    {char:'仇',sound:'구',meaning:'원수',radical:'人',note:'仇讐(구수)',sources:['복기본']},
+    {char:'夸',sound:'과',meaning:'자랑할',radical:'大',note:'夸張(과장)',sources:['복기본']},
+    {char:'頁',sound:'혈',meaning:'머리',radical:'頁',note:'부수로도 쓰임',sources:['복기본']},
+    {char:'怯',sound:'겁',meaning:'겁낼',radical:'心',note:'怯懦(겁나)',sources:['복기본']},
+    {char:'蟹',sound:'해',meaning:'게',radical:'虫',note:'蟹(해)=게',sources:['복기본','학습용']},
+    {char:'羅',sound:'라',meaning:'벌릴·그물',radical:'网',note:'網羅(망라)',sources:['복기본']},
+    {char:'悼',sound:'도',meaning:'슬퍼할',radical:'心',note:'悼亡(도망)',sources:['복기본']},
+    {char:'懿',sound:'의',meaning:'아름다울',radical:'心',note:'懿範(의범)',sources:['복기본']},
+    {char:'喘',sound:'천',meaning:'숨찰',radical:'口',note:'喘息(천식)',sources:['복기본']},
+    {char:'祕',sound:'비',meaning:'숨길',radical:'示',note:'秘密(비밀)',sources:['복기본']},
+    {char:'朮',sound:'출',meaning:'차조',radical:'木',note:'白朮(백출)=한약재',sources:['복기본']},
+    {char:'宦',sound:'환',meaning:'벼슬',radical:'宀',note:'宦官(환관)',sources:['복기본']},
+    {char:'巾',sound:'건',meaning:'수건',radical:'巾',note:'頭巾(두건)',sources:['복기본']},
+    {char:'熊',sound:'웅',meaning:'곰',radical:'灬',note:'熊膽(웅담)',sources:['복기본','2013','2017']},
+    {char:'翼',sound:'익',meaning:'날개',radical:'羽',note:'翼贊(익찬)',sources:['복기본']},
+    {char:'昊',sound:'호',meaning:'하늘',radical:'日',note:'昊天(호천)',sources:['복기본','2017']},
+    {char:'琴',sound:'금',meaning:'거문고',radical:'玉',note:'琴瑟(금슬)',sources:['복기본']},
+    {char:'羹',sound:'갱',meaning:'국',radical:'羊',note:'羹湯(갱탕)',sources:['복기본']},
+    {char:'疲',sound:'피',meaning:'피곤할',radical:'疒',note:'疲困(피곤)',sources:['복기본']},
+    {char:'獐',sound:'장',meaning:'노루',radical:'犬',note:'獐(장)=노루',sources:['복기본','2017']},
+    {char:'卉',sound:'훼',meaning:'풀',radical:'十',note:'花卉(화훼)',sources:['복기본']},
+    {char:'奈',sound:'내',meaning:'어찌',radical:'大',note:'奈何(내하)',sources:['복기본']},
+    {char:'屹',sound:'흘',meaning:'우뚝솟을',radical:'山',note:'屹立(흘립)',sources:['복기본']},
+    {char:'曇',sound:'담',meaning:'흐리다',radical:'日',note:'曇天(담천)',sources:['복기본']},
+    {char:'渾',sound:'혼',meaning:'흐릴',radical:'水',note:'渾濁(혼탁)',sources:['복기본']},
+    {char:'濁',sound:'탁',meaning:'흐릴',radical:'Water',note:'渾濁(혼탁), 淸濁(청탁)',sources:['복기본']},
+    {char:'冥',sound:'명',meaning:'어두울',radical:'冖',note:'冥想(명상)',sources:['복기본']},
+    {char:'昏',sound:'혼',meaning:'어두울',radical:'日',note:'昏迷(혼미), 黃昏(황혼)',sources:['복기본']},
+    {char:'璧',sound:'벽',meaning:'구슬',radical:'玉',note:'完璧(완벽)',sources:['복기본']},
+    {char:'猿',sound:'원',meaning:'원숭이',radical:'犬',note:'猿人(원인)',sources:['복기본']},
+    {char:'衰',sound:'쇠',meaning:'쇠할',radical:'衣',note:'衰退(쇠퇴)',sources:['복기본']},
+    {char:'芙',sound:'부',meaning:'연꽃',radical:'艸',note:'芙蓉(부용)',sources:['복기본']},
+    {char:'蓉',sound:'용',meaning:'연꽃',radical:'艸',note:'芙蓉(부용)',sources:['복기본']},
+    {char:'堆',sound:'퇴',meaning:'쌓을',radical:'土',note:'堆積(퇴적)',sources:['복기본']},
+    {char:'勃',sound:'발',meaning:'노할·일어날',radical:'力',note:'勃發(발발)',sources:['복기본','학습용']},
+    {char:'脂',sound:'지',meaning:'기름',radical:'肉',note:'脂肪(지방)',sources:['복기본','2013','2017']},
+    {char:'肪',sound:'방',meaning:'기름·살찔',radical:'肉',note:'脂肪(지방)',sources:['복기본']},
+    {char:'杜',sound:'두',meaning:'막을',radical:'木',note:'杜絶(두절)',sources:['복기본']},
+    {char:'膽',sound:'담',meaning:'쓸개',radical:'肉',note:'膽力(담력)',sources:['복기본']},
+    {char:'腎',sound:'신',meaning:'콩팥',radical:'肉',note:'腎臟(신장)',sources:['복기본']},
+    {char:'臂',sound:'비',meaning:'팔뚝',radical:'肉',note:'臂力(비력)',sources:['복기본','2017']},
+    {char:'濃',sound:'농',meaning:'짙을',radical:'水',note:'濃艶(농염)',sources:['복기본']},
+    {char:'陟',sound:'척',meaning:'오를',radical:'阜',note:'陟降(척강)',sources:['복기본']},
+    {char:'陞',sound:'승',meaning:'오를',radical:'阜',note:'陞進(승진)',sources:['복기본']},
+    {char:'穿',sound:'천',meaning:'뚫을',radical:'穴',note:'穿鑿(천착)',sources:['복기본']},
+    {char:'匡',sound:'광',meaning:'바를',radical:'匚',note:'匡正(광정)',sources:['복기본']},
+    {char:'蝦',sound:'하',meaning:'새우',radical:'虫',note:'蝦蟆(하마)=두꺼비',sources:['복기본']},
+    {char:'穹',sound:'궁',meaning:'하늘',radical:'穴',note:'穹蒼(궁창)',sources:['복기본']},
+    {char:'酋',sound:'추',meaning:'우두머리',radical:'酉',note:'酋長(추장)',sources:['복기본']},
+    {char:'虹',sound:'홍',meaning:'무지개',radical:'虫',note:'彩虹(채홍)',sources:['복기본']},
+    {char:'塡',sound:'전',meaning:'메울',radical:'土',note:'補塡(보전)',sources:['복기본']},
+    {char:'咽',sound:'열·인',meaning:'목멜·목구멍',radical:'口',note:'咽喉(인후), 嗚咽(오열)',sources:['복기본']},
+    {char:'頒',sound:'반',meaning:'나눌',radical:'頁',note:'頒布(반포)',sources:['복기본','학습용']},
+    {char:'兔',sound:'토',meaning:'토끼',radical:'儿',note:'兔死狐悲(토사호비)',sources:['복기본']},
+    {char:'塚',sound:'총',meaning:'무덤',radical:'土',note:'古塚(고총)',sources:['복기본','2017']},
+    {char:'殿',sound:'전',meaning:'큰집·전각',radical:'殳',note:'宮殿(궁전)',sources:['복기본']},
+    {char:'屑',sound:'설',meaning:'가루',radical:'尸',note:'木屑(목설)',sources:['복기본']},
+    {char:'鷲',sound:'취',meaning:'독수리',radical:'鳥',note:'鷲(취)=독수리',sources:['복기본','2017']},
+    {char:'襁',sound:'강',meaning:'포대기',radical:'衣',note:'襁褓(강보)',sources:['복기본']},
+    {char:'稚',sound:'치',meaning:'어릴',radical:'禾',note:'稚拙(치졸)',sources:['복기본']},
+    {char:'衾',sound:'금',meaning:'이불',radical:'衣',note:'衾枕(금침)',sources:['복기본']},
+    {char:'欣',sound:'흔',meaning:'기쁠',radical:'欠',note:'欣喜(흔희)',sources:['복기본']},
+    {char:'怡',sound:'이',meaning:'기쁠',radical:'心',note:'怡悅(이열)',sources:['복기본']},
+    {char:'瓣',sound:'판',meaning:'꽃잎',radical:'瓜',note:'花瓣(화판), 瓣膜(판막)',sources:['복기본']},
+    {char:'倦',sound:'권',meaning:'게으를',radical:'人',note:'倦怠(권태)',sources:['복기본','2017']},
+    {char:'眷',sound:'권',meaning:'돌볼',radical:'目',note:'眷屬(권속)',sources:['복기본']},
+    {char:'暈',sound:'훈',meaning:'무리',radical:'日',note:'月暈(월훈)=달무리',sources:['복기본']},
+    {char:'帙',sound:'질',meaning:'책갑',radical:'巾',note:'書帙(서질)',sources:['복기본']},
+    {char:'鍵',sound:'건',meaning:'열쇠',radical:'金',note:'關鍵(관건)',sources:['복기본']},
+    {char:'魁',sound:'괴',meaning:'괴수·으뜸',radical:'鬼',note:'魁首(괴수)',sources:['복기본']},
+    {char:'攪',sound:'교',meaning:'흔들',radical:'手',note:'攪亂(교란)',sources:['복기본']},
+    {char:'凱',sound:'개',meaning:'개선',radical:'几',note:'凱旋(개선)',sources:['복기본']},
+    {char:'傘',sound:'산',meaning:'우산',radical:'人',note:'傘下(산하)',sources:['복기본']},
+    {char:'虐',sound:'학',meaning:'모질',radical:'虍',note:'殘虐(잔학)',sources:['복기본']},
+    {char:'涅',sound:'열',meaning:'개흙',radical:'Water',note:'涅槃(열반)',sources:['복기본']},
+    {char:'錐',sound:'추',meaning:'송곳',radical:'金',note:'囊中之錐(낭중지추)',sources:['복기본','2017']},
+    {char:'鼠',sound:'서',meaning:'쥐',radical:'鼠',note:'首鼠兩端(수서양단)',sources:['복기본','2017']},
+    {char:'彬',sound:'빈',meaning:'빛날',radical:'彡',note:'彬彬(빈빈)',sources:['복기본','2017']},
+    {char:'帛',sound:'백',meaning:'비단',radical:'巾',note:'絹帛(견백)',sources:['복기본','학습용']},
+    {char:'苔',sound:'태',meaning:'이끼',radical:'艸',note:'苔蘚(태선)',sources:['복기본','학습용']},
+    {char:'薑',sound:'강',meaning:'생강',radical:'艸',note:'生薑(생강)',sources:['복기본','2017']},
+    {char:'描',sound:'묘',meaning:'그릴',radical:'手',note:'描寫(묘사)',sources:['복기본']},
+    {char:'畓',sound:'답',meaning:'논',radical:'水',note:'田畓(전답)',sources:['복기본']},
+    {char:'堪',sound:'감',meaning:'견딜',radical:'土',note:'堪耐(감내)',sources:['복기본']},
+    {char:'魅',sound:'매',meaning:'도깨비',radical:'鬼',note:'魅了(매료)',sources:['복기본','학습용']},
+    {char:'邁',sound:'매',meaning:'멀리갈',radical:'辶',note:'邁進(매진)',sources:['복기본','학습용']},
+    {char:'墾',sound:'간',meaning:'개간할',radical:'土',note:'開墾(개간)',sources:['복기본']},
+    {char:'鴨',sound:'압',meaning:'오리',radical:'鳥',note:'鴨綠江(압록강)',sources:['복기본']},
+    {char:'灰',sound:'회',meaning:'재·먼지',radical:'火',note:'灰色(회색)',sources:['복기본','학습용']},
+    {char:'羌',sound:'강',meaning:'오랑캐',radical:'羊',note:'羌族(강족)',sources:['복기본','학습용']},
+    {char:'俎',sound:'조',meaning:'도마',radical:'人',note:'俎豆(조두)',sources:['복기본']},
+    {char:'佩',sound:'패',meaning:'찰',radical:'人',note:'佩用(패용)',sources:['복기본']},
+    {char:'謀',sound:'모',meaning:'꾀',radical:'言',note:'謀略(모략)',sources:['복기본']},
+    {char:'嫂',sound:'수',meaning:'형수',radical:'女',note:'兄嫂(형수)',sources:['복기본']},
+    {char:'禦',sound:'어',meaning:'막을',radical:'示',note:'防禦(방어)',sources:['복기본']},
+    {char:'誼',sound:'의',meaning:'옳을·정',radical:'言',note:'友誼(우의)',sources:['복기본']},
+    {char:'錘',sound:'추',meaning:'저울추',radical:'金',note:'錘(추)=추, 錐(추)=송곳 구별!',sources:['복기본']},
+    {char:'錯',sound:'착',meaning:'어긋날',radical:'金',note:'錯誤(착오)',sources:['복기본']},
+    {char:'鈿',sound:'전',meaning:'비녀',radical:'金',note:'鈿(전)=비녀',sources:['복기본']},
+    {char:'芥',sound:'개',meaning:'겨자',radical:'艸',note:'芥子(개자)',sources:['복기본']},
+    {char:'渠',sound:'거',meaning:'도랑',radical:'Water',note:'溝渠(구거)',sources:['복기본']},
+    {char:'躬',sound:'궁',meaning:'몸',radical:'身',note:'躬行(궁행)',sources:['복기본']},
+    {char:'樵',sound:'초',meaning:'나무할',radical:'木',note:'樵夫(초부)',sources:['복기본']},
+    {char:'擦',sound:'찰',meaning:'문지를',radical:'手',note:'擦過傷(찰과상)',sources:['복기본']},
+    {char:'芝',sound:'지',meaning:'지초',radical:'艸',note:'靈芝(영지)',sources:['복기본']},
+    {char:'罵',sound:'매',meaning:'꾸짖을',radical:'网',note:'唾罵(타매)',sources:['복기본']},
+    {char:'悖',sound:'패',meaning:'거스를',radical:'心',note:'悖倫(패륜)',sources:['복기본']},
+    {char:'羈',sound:'기',meaning:'굴레',radical:'网',note:'羈絆(기반)',sources:['복기본']},
+    {char:'閼',sound:'알',meaning:'가로막을',radical:'門',note:'閼氏(알씨)',sources:['복기본','학습용']},
+    {char:'顆',sound:'과',meaning:'낟알',radical:'頁',note:'顆粒(과립)',sources:['복기본','학습용']},
+    {char:'粒',sound:'립',meaning:'낟알',radical:'米',note:'粒子(입자)',sources:['복기본']},
+    {char:'貊',sound:'맥',meaning:'맥국',radical:'豸',note:'濊貊(예맥)',sources:['복기본']},
+    {char:'巽',sound:'손',meaning:'부드러울',radical:'巳',note:'팔괘의 하나',sources:['복기본','2017']},
+    {char:'瘡',sound:'창',meaning:'부스럼',radical:'疒',note:'瘡痍(창이)',sources:['복기본','학습용']},
+    {char:'鼎',sound:'정',meaning:'솥',radical:'鼎',note:'鼎立(정립)',sources:['복기본']},
+    {char:'揭',sound:'게',meaning:'높이들',radical:'Hand',note:'揭示(게시)',sources:['복기본']},
+    {char:'蝴',sound:'호',meaning:'나비',radical:'虫',note:'蝴蝶(호접)',sources:['복기본']},
+    {char:'帽',sound:'모',meaning:'모자',radical:'巾',note:'帽子(모자)',sources:['복기본','2017']},
+    {char:'碗',sound:'완',meaning:'사발',radical:'石',note:'茶碗(다완)',sources:['복기본']},
+    {char:'簫',sound:'소',meaning:'퉁소',radical:'竹',note:'洞簫(동소)',sources:['복기본','학습용']},
+    {char:'萌',sound:'맹',meaning:'싹트다',radical:'艸',note:'萌芽(맹아)',sources:['복기본','학습용','2013','2017']},
+    {char:'禱',sound:'도',meaning:'빌다',radical:'示',note:'祈禱(기도)',sources:['복기본']},
+    {char:'逋',sound:'포',meaning:'달아날',radical:'辶',note:'逋逃(포도)',sources:['복기본']},
+    {char:'剖',sound:'부',meaning:'쪼갤',radical:'刀',note:'剖析(부석)',sources:['복기본']},
+    {char:'釜',sound:'부',meaning:'가마',radical:'金',note:'釜山(부산)',sources:['복기본']},
+    {char:'斧',sound:'부',meaning:'도끼',radical:'斤',note:'斧鉞(부월)',sources:['복기본']},
+    {char:'遁',sound:'둔',meaning:'달아날',radical:'辶',note:'遁走(둔주)',sources:['복기본']},
+    {char:'訥',sound:'눌',meaning:'말더듬을',radical:'言',note:'訥言(눌언)',sources:['복기본','2017']},
+    {char:'鑿',sound:'착',meaning:'뚫을',radical:'金',note:'穿鑿(천착)',sources:['복기본']},
+    {char:'撰',sound:'찬',meaning:'지을',radical:'Hand',note:'撰述(찬술)',sources:['복기본','학습용']},
+    {char:'訛',sound:'와',meaning:'그릇될',radical:'言',note:'訛傳(와전)',sources:['복기본']},
+    {char:'吻',sound:'문',meaning:'입술',radical:'口',note:'吻合(문합)',sources:['복기본']},
+    {char:'鈴',sound:'령',meaning:'방울',radical:'金',note:'鈴(령)=방울',sources:['복기본']},
+    {char:'豚',sound:'돈',meaning:'돼지',radical:'肉',note:'豚肉(돈육)',sources:['복기본']},
+    {char:'壘',sound:'루',meaning:'보루',radical:'土',note:'堡壘(보루)',sources:['복기본']},
+    {char:'盟',sound:'맹',meaning:'맹세',radical:'皿',note:'同盟(동맹)',sources:['복기본']},
+    {char:'拈',sound:'념',meaning:'집을',radical:'Hand',note:'拈出(염출)',sources:['복기본']},
+    {char:'站',sound:'참',meaning:'서다·역마을',radical:'立',note:'站驛(참역)',sources:['복기본']},
+    {char:'懺',sound:'참',meaning:'뉘우칠',radical:'Heart',note:'懺悔(참회)',sources:['복기본']},
+    {char:'拉',sound:'랍',meaning:'끌',radical:'Hand',note:'拉致(납치)',sources:['복기본']},
+    {char:'仄',sound:'측',meaning:'기울',radical:'人',note:'仄聲(측성)',sources:['복기본']},
+    {char:'膚',sound:'부',meaning:'살갗',radical:'肉',note:'皮膚(피부)',sources:['복기본']},
+    {char:'艱',sound:'간',meaning:'어려울',radical:'艮',note:'艱難(간난)',sources:['복기본']},
+    {char:'屠',sound:'도',meaning:'잡을·죽일',radical:'尸',note:'屠殺(도살)',sources:['복기본']},
+    {char:'兌',sound:'태',meaning:'빛날·바꿀',radical:'儿',note:'兌換(태환)',sources:['복기본']},
+    {char:'溢',sound:'일',meaning:'넘칠',radical:'Water',note:'充溢(충일)',sources:['복기본','2013','2017']},
+    {char:'濫',sound:'람',meaning:'넘칠',radical:'Water',note:'濫用(남용)',sources:['복기본','학습용']},
+    {char:'斂',sound:'렴',meaning:'거둘',radical:'攴',note:'收斂(수렴)',sources:['복기본']},
+    {char:'刹',sound:'찰',meaning:'절',radical:'刀',note:'刹那(찰나)',sources:['복기본']},
+    {char:'陪',sound:'배',meaning:'모시다',radical:'阜',note:'陪席(배석)',sources:['복기본','학습용']},
+    {char:'呪',sound:'주',meaning:'빌다',radical:'口',note:'呪術(주술)',sources:['복기본']},
+    {char:'懶',sound:'라',meaning:'게으를',radical:'Heart',note:'懶怠(나태)',sources:['복기본']},
+    {char:'怠',sound:'태',meaning:'게으를',radical:'Heart',note:'怠慢(태만)',sources:['복기본']},
+    {char:'譜',sound:'보',meaning:'족보',radical:'言',note:'族譜(족보)',sources:['복기본']},
+    {char:'杏',sound:'행',meaning:'살구',radical:'Wood',note:'杏仁(행인)',sources:['복기본']},
+    {char:'痴',sound:'치',meaning:'어리석을',radical:'疒',note:'痴呆(치매)',sources:['복기본']},
+    {char:'溺',sound:'닉',meaning:'빠질',radical:'Water',note:'耽溺(탐닉)',sources:['복기본']},
+    {char:'遵',sound:'준',meaning:'좇을',radical:'辶',note:'遵守(준수)',sources:['복기본']},
+    {char:'蟾',sound:'섬',meaning:'두꺼비',radical:'虫',note:'蟾蜍(섬서)',sources:['복기본','학습용']},
+    {char:'液',sound:'액',meaning:'진',radical:'Water',note:'液體(액체)',sources:['복기본']},
+    {char:'腋',sound:'액',meaning:'겨드랑이',radical:'肉',note:'腋窩(액와)',sources:['복기본']},
+    {char:'額',sound:'액',meaning:'이마',radical:'頁',note:'額面(액면)',sources:['복기본']},
+    {char:'隙',sound:'극',meaning:'틈·구멍',radical:'阜',note:'間隙(간극)',sources:['복기본']},
+    {char:'梵',sound:'범',meaning:'불경',radical:'Wood',note:'梵語(범어)',sources:['복기본']},
+    {char:'括',sound:'괄',meaning:'묶을',radical:'Hand',note:'總括(총괄)',sources:['복기본']},
+    {char:'幇',sound:'방',meaning:'도울',radical:'巾',note:'幇助(방조)',sources:['복기본']},
+    {char:'驥',sound:'기',meaning:'천리마',radical:'馬',note:'驊驥(화기)',sources:['복기본']},
+    {char:'撒',sound:'살',meaning:'뿌릴',radical:'Hand',note:'撒布(살포)',sources:['복기본','학습용']},
+    {char:'硯',sound:'연',meaning:'벼루',radical:'石',note:'硯匣(연갑)',sources:['복기본']},
+    {char:'鱗',sound:'린',meaning:'비늘',radical:'魚',note:'鱗片(린편)',sources:['복기본']},
+    {char:'麟',sound:'린',meaning:'기린',radical:'鹿',note:'麒麟(기린)',sources:['복기본']},
+    {char:'泌',sound:'비',meaning:'분비할',radical:'Water',note:'分泌(분비)',sources:['복기본']},
+    {char:'靴',sound:'화',meaning:'가죽신',radical:'革',note:'長靴(장화)',sources:['복기본']},
+    {char:'鞋',sound:'혜',meaning:'신',radical:'革',note:'鞋(혜)=신발',sources:['복기본']},
+    {char:'股',sound:'고',meaning:'넓적다리',radical:'肉',note:'股肱(고굉)',sources:['복기본']},
+    {char:'姑',sound:'고',meaning:'시어미',radical:'女',note:'姑息(고식)',sources:['복기본']},
+    {char:'豬',sound:'저',meaning:'돼지',radical:'豕',note:'豬肉(저육)',sources:['복기본']},
+    {char:'牲',sound:'생',meaning:'희생',radical:'牛',note:'牲畜(생축)',sources:['복기본']},
+    {char:'笙',sound:'생',meaning:'생황',radical:'竹',note:'笙簧(생황)',sources:['복기본']},
+    {char:'鐸',sound:'탁',meaning:'방울',radical:'金',note:'鐸(탁)=큰방울',sources:['복기본']},
+    {char:'駝',sound:'타',meaning:'낙타',radical:'馬',note:'駱駝(낙타)',sources:['복기본','2017']},
+    {char:'墮',sound:'타',meaning:'떨어질',radical:'土',note:'墮落(타락)',sources:['복기본']},
+    {char:'悶',sound:'민',meaning:'답답할',radical:'Heart',note:'煩悶(번민)',sources:['복기본','학습용','2013','2017']},
+    {char:'鬱',sound:'울',meaning:'답답할',radical:'鬯',note:'憂鬱(우울)',sources:['복기본']},
+    {char:'燧',sound:'수',meaning:'부싯돌',radical:'Fire',note:'烽燧(봉수)',sources:['복기본','학습용']},
+    {char:'烽',sound:'봉',meaning:'봉화',radical:'Fire',note:'烽火(봉화)',sources:['복기본']},
+    {char:'覡',sound:'격',meaning:'무당(남)',radical:'見',note:'巫覡(무격)',sources:['복기본','학습용','2017']},
+    {char:'坑',sound:'갱',meaning:'구덩이',radical:'土',note:'坑道(갱도)',sources:['복기본','학습용','2017']},
+    {char:'謄',sound:'등',meaning:'베끼다',radical:'言',note:'謄本(등본)',sources:['복기본','학습용','2017']},
+    {char:'罹',sound:'리',meaning:'걸리다',radical:'网',note:'罹患(이환)',sources:['복기본','학습용','2017']},
+    {char:'妖',sound:'요',meaning:'요사할',radical:'女',note:'妖怪(요괴)',sources:['복기본','2017']},
+    {char:'阻',sound:'저',meaning:'막힐',radical:'阜',note:'阻止(저지)',sources:['복기본','2017']},
+    {char:'覇',sound:'패',meaning:'으뜸',radical:'西',note:'覇者(패자)',sources:['복기본','2017']},
+    {char:'笏',sound:'홀',meaning:'홀',radical:'竹',note:'笏(홀)=조회 때 드는 것',sources:['복기본','2017']},
+    {char:'霞',sound:'하',meaning:'노을',radical:'雨',note:'輕霞(경하)=엷은 노을',sources:['복기본','2017']},
+    {char:'蛾',sound:'아',meaning:'나방',radical:'虫',note:'蛾眉(아미)=눈썹',sources:['복기본','2017']},
+    {char:'甑',sound:'증',meaning:'시루',radical:'瓦',note:'甑餠(증병)=시루떡',sources:['복기본','학습용','2017']},
+    {char:'頸',sound:'경',meaning:'목',radical:'頁',note:'頸部(경부)',sources:['복기본','학습용','2013','2017']},
+    {char:'邱',sound:'구',meaning:'언덕',radical:'邑',note:'邱陵(구릉)',sources:['복기본','학습용','2017']},
+    {char:'瓜',sound:'과',meaning:'오이',radical:'瓜',note:'南瓜(남과)=호박',sources:['복기본','학습용','2017']},
+    {char:'晷',sound:'귀',meaning:'그림자·해시계',radical:'日',note:'晷漏(귀루)',sources:['복기본','학습용']},
+  ]
+},
+
+yuuii: {
+  name: '1영역 · 유의어',
+  color: '#3aab8a',
+  sub: '한자 보고 공통 뜻 객관식',
+  cards: [
+    {chars:[{c:'溢',s:'일'},{c:'濫',s:'람'}],answer:'넘치다',choices:['넘치다','줄어들다','모으다','흘리다'],note:'溢=충일(充溢), 濫=남용(濫用)'},
+    {chars:[{c:'遁',s:'둔'},{c:'逋',s:'포'}],answer:'달아나다',choices:['달아나다','돌아오다','모시다','막다'],note:'遁走(둔주), 逋逃(포도)'},
+    {chars:[{c:'穿',s:'천'},{c:'鑿',s:'착'}],answer:'뚫다',choices:['뚫다','막다','쌓다','흔들다'],note:'穿孔(천공), 穿鑿(천착)'},
+    {chars:[{c:'欣',s:'흔'},{c:'怡',s:'이'},{c:'喜',s:'희'}],answer:'기쁘다',choices:['기쁘다','슬프다','두렵다','부끄럽다'],note:'欣喜雀躍(흔희작약)'},
+    {chars:[{c:'懶',s:'라'},{c:'怠',s:'태'}],answer:'게으르다',choices:['게으르다','부지런하다','겁내다','즐기다'],note:'懶怠(나태)'},
+    {chars:[{c:'朽',s:'후'},{c:'腐',s:'부'}],answer:'썩다',choices:['썩다','타다','굳다','사라지다'],note:'朽木(후목), 腐蝕(부식)'},
+    {chars:[{c:'牲',s:'생'},{c:'犧',s:'희'}],answer:'희생',choices:['희생','도구','먹이','축제'],note:'牲畜(생축), 犧牲(희생)'},
+    {chars:[{c:'剩',s:'잉'},{c:'餘',s:'여'}],answer:'남다',choices:['남다','부족하다','채우다','나누다'],note:'過剩(과잉), 殘餘(잔여)'},
+    {chars:[{c:'閼',s:'알'},{c:'沮',s:'저'}],answer:'막다',choices:['막다','열다','뚫다','쌓다'],note:'閼氏(알씨), 沮止(저지)'},
+    {chars:[{c:'呪',s:'주'},{c:'禱',s:'도'}],answer:'빌다',choices:['빌다','꾸짖다','칭찬하다','명령하다'],note:'呪術(주술), 祈禱(기도)'},
+    {chars:[{c:'萌',s:'맹'},{c:'芽',s:'아'}],answer:'싹트다',choices:['싹트다','시들다','피어나다','떨어지다'],note:'萌芽(맹아), 發芽(발아)'},
+    {chars:[{c:'顆',s:'과'},{c:'粒',s:'립'}],answer:'낟알',choices:['낟알','이삭','뿌리','잎'],note:'顆粒(과립), 粒子(입자)'},
+    {chars:[{c:'釜',s:'부'},{c:'鼎',s:'정'}],answer:'솥·가마',choices:['솥·가마','도끼','칼','방패'],note:'釜山(부산), 鼎立(정립)'},
+    {chars:[{c:'蒐',s:'수'},{c:'聚',s:'취'}],answer:'모으다',choices:['모으다','흩다','나누다','쌓다'],note:'蒐集(수집), 聚合(취합)'},
+    {chars:[{c:'渾',s:'혼'},{c:'濁',s:'탁'},{c:'曇',s:'담'}],answer:'흐리다',choices:['흐리다','맑다','밝다','어둡다'],note:'渾濁(혼탁), 曇天(담천)'},
+    {chars:[{c:'冥',s:'명'},{c:'昏',s:'혼'}],answer:'어둡다',choices:['어둡다','밝다','빛나다','빠르다'],note:'冥想(명상), 昏迷(혼미)'},
+    {chars:[{c:'脂',s:'지'},{c:'肪',s:'방'}],answer:'기름',choices:['기름','살갗','힘줄','뼈'],note:'脂肪(지방)'},
+    {chars:[{c:'焚',s:'분'},{c:'燒',s:'소'}],answer:'불사르다',choices:['불사르다','끄다','녹이다','피우다'],note:'焚書坑儒(분서갱유)'},
+    {chars:[{c:'陟',s:'척'},{c:'陞',s:'승'}],answer:'오르다',choices:['오르다','내리다','달리다','멈추다'],note:'陟降(척강), 陞進(승진)'},
+    {chars:[{c:'芙',s:'부'},{c:'蓉',s:'용'}],answer:'연꽃',choices:['연꽃','국화','매화','난초'],note:'芙蓉(부용)=연꽃'},
+    {chars:[{c:'撰',s:'찬'},{c:'作',s:'작'}],answer:'짓다·쓰다',choices:['짓다·쓰다','읽다','번역하다','외우다'],note:'撰述(찬술), 著作(저작)'},
+    {chars:[{c:'鐸',s:'탁'},{c:'鈴',s:'령'}],answer:'방울',choices:['방울','북','피리','거문고'],note:'鐸=큰방울, 鈴=작은방울'},
+    {chars:[{c:'穿',s:'천'},{c:'鑿',s:'착'}],answer:'뚫다',choices:['뚫다','막다','쌓다','흔들다'],note:'穿孔, 穿鑿'},
+    {chars:[{c:'遁',s:'둔'},{c:'逋',s:'포'},{c:'逃',s:'도'}],answer:'달아나다',choices:['달아나다','따르다','이끌다','막다'],note:'遁走·逋逃·逃亡'},
+    {chars:[{c:'訛',s:'와'},{c:'謬',s:'류'}],answer:'그릇되다',choices:['그릇되다','바르다','옳다','고치다'],note:'訛傳(와전), 謬見(류견)'},
+    {chars:[{c:'懺',s:'참'},{c:'悔',s:'회'}],answer:'뉘우치다',choices:['뉘우치다','기뻐하다','자랑하다','잊다'],note:'懺悔(참회)'},
+    {chars:[{c:'壘',s:'루'},{c:'堡',s:'보'}],answer:'보루·요새',choices:['보루·요새','집','다리','문'],note:'堡壘(보루)'},
+    {chars:[{c:'樵',s:'초'},{c:'柴',s:'시'}],answer:'나무·땔감',choices:['나무·땔감','물·강','흙·땅','돌·바위'],note:'樵夫(초부)=나무꾼, 柴扉(시비)=사립문'},
+  ]
+},
+
+idiom: {
+  name: '2영역 · 사자성어',
+  color: '#c89820',
+  sub: '빈칸 객관식',
+  cards: [
+    {idiom:'臥薪嘗膽',blank:1,blankChar:'薪',choices:['娠','薪','紳','迅'],meaning:'원수를 갚으려 온갖 고난을 참고 견딤',note:'薪(신)=섶나무'},
+    {idiom:'囊中之錐',blank:3,blankChar:'錐',choices:['椎','錘','錐','樞'],meaning:'뛰어난 인재는 저절로 드러남',note:'錐(추)=송곳. 錘(추)=저울추와 혼동 주의'},
+    {idiom:'牽强附會',blank:2,blankChar:'附',choices:['付','附','副','剖'],meaning:'이치에 맞지 않는 말을 억지로 끌어 붙임',note:'附(부)=붙다. 付(부)=주다'},
+    {idiom:'五里霧中',blank:2,blankChar:'霧',choices:['無','舞','茂','霧'],meaning:'방향을 잡을 수 없는 상태',note:'霧(무)=안개'},
+    {idiom:'隱忍自重',blank:1,blankChar:'忍',choices:['因','認','忍','印'],meaning:'감정을 억제하고 신중히 처신함',note:'忍(인)=참다'},
+    {idiom:'弄瓦之慶',blank:1,blankChar:'瓦',choices:['蛙','臥','訛','瓦'],meaning:'딸을 낳은 기쁨',note:'瓦(와)=기와. 弄璋之慶=아들 낳은 기쁨'},
+    {idiom:'大巧若拙',blank:2,blankChar:'若',choices:['若','弱','約','躍'],meaning:'매우 능숙한 것은 서툰 것처럼 보임',note:'若(약)=같다·만약'},
+    {idiom:'雪膚花容',blank:1,blankChar:'膚',choices:['傅','膚','孚','剖'],meaning:'눈처럼 흰 살갗과 꽃처럼 고운 얼굴',note:'膚(부)=살갗'},
+    {idiom:'好事多魔',blank:2,blankChar:'魔',choices:['麻','摩','瑪','魔'],meaning:'좋은 일에는 탈도 많다',note:'魔(마)=마귀'},
+    {idiom:'水到渠成',blank:1,blankChar:'渠',choices:['渠','去','距','拒'],meaning:'조건이 갖춰지면 자연스럽게 일이 이뤄짐',note:'渠(거)=도랑·수로'},
+    {idiom:'萬壽無疆',blank:2,blankChar:'疆',choices:['姜','羌','疆','薑'],meaning:'아무 탈 없이 아주 오래 삶',note:'疆(강)=지경·경계'},
+    {idiom:'切磋琢磨',blank:2,blankChar:'琢',choices:['琢','託','鐸','托'],meaning:'학문·덕행을 갈고 닦음',note:'琢(탁)=쪼다·다듬다'},
+    {idiom:'汗牛充棟',blank:0,blankChar:'汗',choices:['汗','旱','干','韓'],meaning:'가지고 있는 책이 매우 많음',note:'소가 땀 흘릴 정도의 많은 책'},
+    {idiom:'如履薄氷',blank:2,blankChar:'薄',choices:['薄','迫','博','縛'],meaning:'살얼음을 밟는 것처럼 매우 조심함',note:'薄氷(박빙)=얇은 얼음'},
+    {idiom:'羊頭狗肉',blank:1,blankChar:'頭',choices:['頭','豆','斗','逗'],meaning:'겉보기만 그럴 듯하고 속은 변변치 않음',note:'양 머리 걸어놓고 개고기를 팖'},
+    {idiom:'牛刀割鷄',blank:1,blankChar:'刀',choices:['刀','道','導','島'],meaning:'작은 일에 큰 도구를 씀',note:'소 잡는 칼로 닭을 잡음'},
+    {idiom:'波瀾萬丈',blank:0,blankChar:'波',choices:['波','頗','坡','婆'],meaning:'일의 진행이 변화가 심함',note:'물결이 만 길이나 됨'},
+    {idiom:'啞然失色',blank:0,blankChar:'啞',choices:['啞','亞','雅','衙'],meaning:'뜻밖의 일에 얼굴빛이 변할 정도로 놀람',note:'啞(아)=벙어리'},
+    {idiom:'袖手傍觀',blank:0,blankChar:'袖',choices:['袖','繡','誘','謀'],meaning:'간섭하거나 거들지 않고 그대로 버려둠',note:'소매에 손을 넣고 구경만 함'},
+    {idiom:'含哺鼓腹',blank:1,blankChar:'哺',choices:['哺','布','捕','鋪'],meaning:'먹을 것이 풍족하여 즐겁게 지냄',note:'음식을 먹으며 배를 두드림'},
+    {idiom:'暴虎馮河',blank:0,blankChar:'暴',choices:['暴','瀑','爆','曝'],meaning:'용기는 있으나 무모함',note:'맨손으로 호랑이를 치고 황하를 건넘'},
+    {idiom:'封庫罷黜',blank:1,blankChar:'庫',choices:['庫','固','苦','故'],meaning:'부정한 관리를 파면함',note:'창고를 봉하고 관리를 파면함'},
+    {idiom:'首鼠兩端',blank:0,blankChar:'首',choices:['首','壽','獸','手'],meaning:'머뭇거리며 진퇴를 정하지 못함',note:'쥐가 구멍에서 머리를 내밀고 망설임'},
+    {idiom:'肝膽相照',blank:1,blankChar:'膽',choices:['膽','擔','談','淡'],meaning:'서로 마음을 터놓고 친밀히 사귐',note:'간과 쓸개를 드러내 보일 만큼 솔직'},
+    {idiom:'甲論乙駁',blank:1,blankChar:'論',choices:['論','倫','輪','潤'],meaning:'서로 논란하고 반박함',note:'甲이 논하면 乙이 반박함'},
+    {idiom:'焚書坑儒',blank:1,blankChar:'書',choices:['書','暑','署','庶'],meaning:'서적을 불태우고 유생을 묻어 죽임',note:'진시황의 사상 탄압'},
+    {idiom:'松茂栢悅',blank:1,blankChar:'茂',choices:['茂','戊','茅','謀'],meaning:'남이 잘 되는 것을 기뻐함',note:'소나무가 무성하면 잣나무가 기뻐함'},
+    {idiom:'班門弄斧',blank:1,blankChar:'門',choices:['門','聞','問','汶'],meaning:'자신의 실력도 모르고 덤빔',note:'목수 반(班)의 문 앞에서 도끼질 자랑'},
+    {idiom:'掩目捕雀',blank:1,blankChar:'目',choices:['目','木','牧','睦'],meaning:'눈 가리고 새를 잡으려 함=건성으로 함',note:'掩(엄)=덮다, 雀(작)=참새'},
+    {idiom:'井底之蛙',blank:2,blankChar:'之',choices:['之','地','知','池'],meaning:'우물 안 개구리=소견이 좁음',note:'井(정)=우물, 蛙(와)=개구리'},
+    {idiom:'龜毛兎角',blank:1,blankChar:'毛',choices:['毛','貌','謀','矛'],meaning:'실존이 불가능한 것',note:'거북의 털과 토끼의 뿔=없는 것'},
+    {idiom:'針小棒大',blank:1,blankChar:'小',choices:['小','少','消','昭'],meaning:'작은 일을 크게 과장함',note:'바늘만한 것을 몽둥이만 하다고 함'},
+    {idiom:'捲土重來',blank:0,blankChar:'捲',choices:['捲','卷','圈','拳'],meaning:'패한 자가 세력을 찾아 다시 쳐들어옴',note:'흙먼지를 날리며 다시 옴'},
+    {idiom:'亢龍有悔',blank:0,blankChar:'亢',choices:['亢','抗','航','恒'],meaning:'극에 달하면 몰락을 경계하라',note:'亢(항)=높다·지나치다'},
+    {idiom:'昏定晨省',blank:1,blankChar:'定',choices:['定','停','訂','廷'],meaning:'아침저녁으로 부모의 안부를 살핌',note:'저녁엔 잠자리, 아침엔 문안'},
+    {idiom:'曲突徙薪',blank:2,blankChar:'薪',choices:['薪','新','辛','申'],meaning:'화근을 미리 방지함',note:'굴뚝 구부리고 아궁이 나무 옮김'},
+    {idiom:'姑息之計',blank:1,blankChar:'息',choices:['息','式','識','植'],meaning:'근본 해결책이 아닌 임시방편',note:'잠시 쉬어가는 계책'},
+    {idiom:'苦肉之計',blank:1,blankChar:'肉',choices:['肉','六','育','陸'],meaning:'적을 속이기 위해 몸을 괴롭혀 짜내는 계책',note:'苦肉(고육)=고통스러운 몸'},
+    {idiom:'望梅解渴',blank:1,blankChar:'梅',choices:['梅','每','枚','媒'],meaning:'공상으로 마음의 위안을 얻음',note:'매실 생각으로 갈증 해소'},
+    {idiom:'黔驢之技',blank:1,blankChar:'驢',choices:['驢','慮','旅','閭'],meaning:'보잘 것 없는 재주',note:'검주 당나귀의 재주'},
+    {idiom:'燕雁代飛',blank:1,blankChar:'雁',choices:['雁','眼','顔','岸'],meaning:'사람이 서로 소식 없이 지냄',note:'제비 올 때 기러기는 떠남'},
+    {idiom:'破邪顯正',blank:1,blankChar:'邪',choices:['邪','射','捨','社'],meaning:'그릇된 생각을 버리고 올바른 도리를 행함',note:'破邪(파사)=삿된 것을 타파'},
+    {idiom:'桂玉之艱',blank:1,blankChar:'玉',choices:['玉','獄','屋','鈺'],meaning:'물가가 비싼 도회에서 고학함',note:'계수나무=장작, 玉=밥. 모두 비쌈'},
+    {idiom:'規矩準繩',blank:1,blankChar:'矩',choices:['矩','距','拒','炬'],meaning:'일상생활에서 지켜야 할 법도',note:'規=컴퍼스, 矩(구)=곱자'},
+    {idiom:'密雲不雨',blank:1,blankChar:'雲',choices:['雲','運','韻','耘'],meaning:'일의 조짐만 보이고 그 일은 닥치지 않음',note:'구름만 빽빽하고 비는 안 옴'},
+    {idiom:'剖棺斬屍',blank:1,blankChar:'棺',choices:['棺','管','觀','貫'],meaning:'큰 죄가 있던 사람 시체를 거리에 내걸음',note:'剖(부)=쪼개다, 斬(참)=베다'},
+    {idiom:'鼓盆之痛',blank:1,blankChar:'盆',choices:['盆','分','奔','噴'],meaning:'상을 당함',note:'술그릇 두드리는 아픔'},
+    {idiom:'路柳墻花',blank:1,blankChar:'柳',choices:['柳','留','流','硫'],meaning:'기생을 의미',note:'길가 버들과 담 밑 꽃=누구든 만질 수 있음'},
+    {idiom:'尸位素餐',blank:1,blankChar:'位',choices:['位','位','衛','圍'],meaning:'직책을 다하지 않으면서 자리만 차지함',note:'尸(시)=주검·자리만 차지함'},
+  ]
+},
+
+confused: {
+  name: '2영역 · 혼동 표기',
+  color: '#c85a3a',
+  sub: '한글→한자 / 틀린것찾기',
+  cards: [
+    {word:'표절',read:'표절',ans:'剽竊',wrong:'飄竊',
+     ansChars:[{c:'剽',s:'표',m:'빠를·노략질',note:'刀부수-칼로 빼앗음'},{c:'竊',s:'절',m:'훔칠',note:'穴부수'}],
+     wrongChars:[{c:'飄',s:'표',m:'회오리바람',note:'風부수-뜻 전혀 다름'},{c:'竊',s:'절',m:'훔칠',note:'동일'}],
+     explain:'剽(표)=빠르게 훔치다(刀). 飄(표)=바람이 회오리침(風). 부수로 구별'},
+    {word:'긴축',read:'긴축',ans:'緊縮',wrong:'緊逐',
+     ansChars:[{c:'緊',s:'긴',m:'죌·급할',note:'糸부수'},{c:'縮',s:'축',m:'줄어들',note:'糸-실처럼 오그라듦'}],
+     wrongChars:[{c:'緊',s:'긴',m:'급할',note:'앞자 동일'},{c:'逐',s:'축',m:'쫓을',note:'辶부수-추방하다'}],
+     explain:'縮(축)=줄이다(糸). 逐(축)=쫓아내다(辶). 발음 같지만 의미 반대'},
+    {word:'번민',read:'번민',ans:'煩悶',wrong:'繁悶',
+     ansChars:[{c:'煩',s:'번',m:'번거로울·괴로울',note:'火부수-마음이 타들어감'},{c:'悶',s:'민',m:'답답할',note:'心부수'}],
+     wrongChars:[{c:'繁',s:'번',m:'무성할·번영',note:'糸부수-번성하다'},{c:'悶',s:'민',m:'답답할',note:'동일'}],
+     explain:'煩(번)=마음이 타오르듯 괴롭다(火). 繁(번)=무성하다(糸)'},
+    {word:'낙인',read:'낙인',ans:'烙印',wrong:'落印',
+     ansChars:[{c:'烙',s:'낙',m:'지질',note:'火부수-불에 달궈 찍음'},{c:'印',s:'인',m:'도장',note:'卩부수'}],
+     wrongChars:[{c:'落',s:'낙',m:'떨어질',note:'艸부수-낙하'},{c:'印',s:'인',m:'도장',note:'동일'}],
+     explain:'烙(낙)=불에 달군 쇠로 지지다(火). 落(낙)=떨어지다(艸)'},
+    {word:'무단',read:'무단',ans:'無斷',wrong:'武斷',
+     ansChars:[{c:'無',s:'무',m:'없을',note:'灬부수'},{c:'斷',s:'단',m:'끊을',note:'斤부수'}],
+     wrongChars:[{c:'武',s:'무',m:'군사·씩씩할',note:'止부수-무력'},{c:'斷',s:'단',m:'끊을',note:'동일'}],
+     explain:'無斷(무단)=허락 없이. 武斷(무단)=무력으로 강행'},
+    {word:'경건',read:'경건',ans:'敬虔',wrong:'敬健',
+     ansChars:[{c:'敬',s:'경',m:'공경할',note:'攴부수'},{c:'虔',s:'건',m:'공경할·정성',note:'虍부수'}],
+     wrongChars:[{c:'敬',s:'경',m:'공경할',note:'동일'},{c:'健',s:'건',m:'굳셀·건강',note:'人부수-건강하다'}],
+     explain:'虔(건)=정성스럽고 경건하다(虍). 健(건)=건강하다(人)'},
+    {word:'귀성',read:'귀성',ans:'歸省',wrong:'歸城',
+     ansChars:[{c:'歸',s:'귀',m:'돌아갈',note:'止부수'},{c:'省',s:'성',m:'살필·뵐',note:'目부수-부모 뵘'}],
+     wrongChars:[{c:'歸',s:'귀',m:'돌아갈',note:'동일'},{c:'城',s:'성',m:'성·고을',note:'土부수-성곽'}],
+     explain:'省(성)=살피다·뵙다(目). 城(성)=성곽(土)'},
+    {word:'오열',read:'오열',ans:'嗚咽',wrong:'汚咽',
+     ansChars:[{c:'嗚',s:'오',m:'탄식할',note:'口부수-소리내어 탄식'},{c:'咽',s:'열',m:'목멜',note:'口부수'}],
+     wrongChars:[{c:'汚',s:'오',m:'더러울',note:'水부수-오염'},{c:'咽',s:'열',m:'목멜',note:'동일'}],
+     explain:'嗚(오)=슬피 울다(口). 汚(오)=더럽다(水)'},
+    {word:'결벽',read:'결벽',ans:'潔癖',wrong:'潔闢',
+     ansChars:[{c:'潔',s:'결',m:'깨끗할',note:'水부수'},{c:'癖',s:'벽',m:'버릇·집착',note:'疒부수-병적습관'}],
+     wrongChars:[{c:'潔',s:'결',m:'깨끗할',note:'동일'},{c:'闢',s:'벽',m:'열·물리칠',note:'門부수-개벽'}],
+     explain:'癖(벽)=병적 집착(疒). 闢(벽)=열다·물리치다(門)'},
+    {word:'도륙',read:'도륙',ans:'屠戮',wrong:'屠陸',
+     ansChars:[{c:'屠',s:'도',m:'잡을·죽일',note:'尸부수'},{c:'戮',s:'륙',m:'죽일·욕보일',note:'戈부수-창으로 죽임'}],
+     wrongChars:[{c:'屠',s:'도',m:'잡을',note:'동일'},{c:'陸',s:'륙',m:'뭍·육지',note:'阜부수-육지'}],
+     explain:'戮(륙)=처형하다(戈). 陸(륙)=육지(阜)'},
+    {word:'완구',read:'완구',ans:'玩具',wrong:'完俱',
+     ansChars:[{c:'玩',s:'완',m:'놀·즐길',note:'玉부수-장난감'},{c:'具',s:'구',m:'갖출·도구',note:'八부수'}],
+     wrongChars:[{c:'完',s:'완',m:'완전할',note:'宀부수'},{c:'俱',s:'구',m:'함께',note:'人부수'}],
+     explain:'玩(완)=장난치며 즐기다(玉). 完(완)=완전하다(宀)'},
+    {word:'복분자',read:'복분자',ans:'覆盆子',wrong:'腹盆子',
+     ansChars:[{c:'覆',s:'복',m:'뒤집힐·덮을',note:'襾부수'},{c:'盆',s:'분',m:'동이',note:'皿부수'},{c:'子',s:'자',m:'씨',note:'子부수'}],
+     wrongChars:[{c:'腹',s:'복',m:'배·뱃속',note:'肉부수-복부'},{c:'盆',s:'분',m:'동이',note:'동일'},{c:'子',s:'자',m:'씨',note:'동일'}],
+     explain:'覆(복)=뒤집다(襾). 腹(복)=배(肉). 동이 뒤집은 듯 달린 열매'},
+    {word:'비등',read:'비등',ans:'沸騰',wrong:'泌騰',
+     ansChars:[{c:'沸',s:'비',m:'끓을',note:'水부수-물이 끓음'},{c:'騰',s:'등',m:'오를',note:'馬부수'}],
+     wrongChars:[{c:'泌',s:'비',m:'분비할',note:'Water부수-분비'},{c:'騰',s:'등',m:'오를',note:'동일'}],
+     explain:'沸(비)=끓다. 泌(비)=분비하다·샘솟다'},
+    {word:'질산',read:'질산',ans:'窒酸',wrong:'膣酸',
+     ansChars:[{c:'窒',s:'질',m:'막힐',note:'穴부수-질소'},{c:'酸',s:'산',m:'신',note:'酉부수'}],
+     wrongChars:[{c:'膣',s:'질',m:'신체부위',note:'肉부수-전혀 다른 뜻'},{c:'酸',s:'산',m:'신',note:'동일'}],
+     explain:'窒(질)=막히다·질식(穴). 膣(질)=신체 용어(肉)'},
+    {word:'친압',read:'친압',ans:'親狎',wrong:'親壓',
+     ansChars:[{c:'親',s:'친',m:'친할',note:'見부수'},{c:'狎',s:'압',m:'친압할',note:'犬부수-지나치게 친함'}],
+     wrongChars:[{c:'親',s:'친',m:'친할',note:'동일'},{c:'壓',s:'압',m:'누를',note:'土부수-압박'}],
+     explain:'狎(압)=지나치게 허물없이 굴다(犬). 壓(압)=누르다(土)'},
+    {word:'초미',read:'초미',ans:'焦眉',wrong:'初味',
+     ansChars:[{c:'焦',s:'초',m:'탈',note:'火부수-눈썹이 탈듯 급박'},{c:'眉',s:'미',m:'눈썹',note:'目부수'}],
+     wrongChars:[{c:'初',s:'초',m:'처음',note:'刀부수'},{c:'味',s:'미',m:'맛',note:'口부수'}],
+     explain:'焦眉(초미)=눈썹에 불이 붙을 만큼 급박. 焦(초)=타다(火)'},
+    {word:'표현',read:'표현',ans:'表現',wrong:'表顯',
+     ansChars:[{c:'表',s:'표',m:'겉·나타낼',note:'衣부수'},{c:'現',s:'현',m:'나타날',note:'玉부수'}],
+     wrongChars:[{c:'表',s:'표',m:'겉',note:'동일'},{c:'顯',s:'현',m:'드러날·빛날',note:'頁부수'}],
+     explain:'現(현)=나타나다. 顯(현)=빛나게 드러나다. 2017기출 오답'},
+    {word:'정보화',read:'정보화',ans:'情報化',wrong:'精報化',
+     ansChars:[{c:'情',s:'정',m:'뜻·감정',note:'心부수'},{c:'報',s:'보',m:'알릴',note:'土부수'},{c:'化',s:'화',m:'될',note:'人부수'}],
+     wrongChars:[{c:'精',s:'정',m:'정밀할',note:'米부수'},{c:'報',s:'보',m:'알릴',note:'동일'},{c:'化',s:'화',m:'될',note:'동일'}],
+     explain:'情報(정보)=소식·알림(心). 精=정밀하다(米). 2017기출'},
+    {word:'비밀히',read:'비밀히',ans:'秘密',wrong:'泌密',
+     ansChars:[{c:'秘',s:'비',m:'숨길',note:'禾부수'},{c:'密',s:'밀',m:'비밀',note:'宀부수'}],
+     wrongChars:[{c:'泌',s:'비',m:'분비할',note:'Water부수'},{c:'密',s:'밀',m:'빽빽할',note:'동일'}],
+     explain:'秘(비)=숨기다(禾). 泌(비)=분비하다(Water). 2017기출'},
+    {word:'양극화',read:'양극화',ans:'兩極化',wrong:'兩隙化',
+     ansChars:[{c:'兩',s:'양',m:'둘',note:'入부수'},{c:'極',s:'극',m:'극·끝',note:'木부수'},{c:'化',s:'화',m:'될',note:'人부수'}],
+     wrongChars:[{c:'兩',s:'양',m:'둘',note:'동일'},{c:'隙',s:'극',m:'틈',note:'阜부수-틈새'},{c:'化',s:'화',m:'될',note:'동일'}],
+     explain:'極(극)=극단(木). 隙(극)=틈새(阜)'},
+    {word:'골계',read:'골계',ans:'滑稽',wrong:'骨格',
+     ansChars:[{c:'滑',s:'골',m:'익살',note:'Water부수'},{c:'稽',s:'계',m:'상고할',note:'禾부수'}],
+     wrongChars:[{c:'骨',s:'골',m:'뼈',note:'骨부수'},{c:'格',s:'격',m:'격식',note:'木부수'}],
+     explain:'滑稽(골계)=익살스러움. 骨格(골격)은 전혀 다른 단어'},
+    {word:'소탕',read:'소탕',ans:'疏宕',wrong:'掃蕩',
+     ansChars:[{c:'疏',s:'소',m:'성글·호탕',note:'疋부수'},{c:'宕',s:'탕',m:'호탕할',note:'宀부수'}],
+     wrongChars:[{c:'掃',s:'소',m:'쓸',note:'手부수'},{c:'蕩',s:'탕',m:'방탕할',note:'Water부수'}],
+     explain:'疏宕(소탕)=수더분하고 호탕함. 掃蕩(소탕)=쓸어 없앰'},
+    {word:'도배',read:'도배',ans:'塗褙',wrong:'塗裝',
+     ansChars:[{c:'塗',s:'도',m:'바를',note:'土부수'},{c:'褙',s:'배',m:'배접할',note:'衣부수-종이붙임'}],
+     wrongChars:[{c:'塗',s:'도',m:'바를',note:'동일'},{c:'裝',s:'장',m:'꾸밀',note:'衣부수-장식'}],
+     explain:'褙(배)=종이를 겹쳐 붙임. 裝(장)=장식하다'},
+    {word:'당착',read:'당착',ans:'撞着',wrong:'唐着',
+     ansChars:[{c:'撞',s:'당',m:'부딪칠',note:'Hand부수'},{c:'着',s:'착',m:'붙을',note:'目부수'}],
+     wrongChars:[{c:'唐',s:'당',m:'당나라·당황',note:'口부수'},{c:'着',s:'착',m:'붙을',note:'동일'}],
+     explain:'撞着(당착)=앞뒤가 맞지 않음. 撞(당)=부딪치다(Hand)'},
+  ]
+},
+
+antonym: {
+  name: '2영역 · 상대어',
+  color: '#2a8a8a',
+  sub: '반의어 쌍 암기',
+  cards: [
+    {a:{w:'昏昧',r:'혼매',m:'어둡고 어리석음'}, b:{w:'明確',r:'명확',m:'밝고 분명함'}},
+    {a:{w:'虛僞',r:'허위',m:'거짓'}, b:{w:'眞實',r:'진실',m:'참됨'}},
+    {a:{w:'冒頭',r:'모두',m:'앞머리'}, b:{w:'末尾',r:'말미',m:'끝부분'}},
+    {a:{w:'模糊',r:'모호',m:'흐릿하고 불분명함'}, b:{w:'確實',r:'확실',m:'분명함'}},
+    {a:{w:'推仰',r:'추앙',m:'높이 우러름'}, b:{w:'輕蔑',r:'경멸',m:'깔보아 업신여김'}},
+    {a:{w:'隔阻',r:'격조',m:'멀리 떨어져 통하지 못함'}, b:{w:'親密',r:'친밀',m:'친하고 가까움'}},
+    {a:{w:'敏捷',r:'민첩',m:'날쌔고 빠름'}, b:{w:'遲鈍',r:'지둔',m:'느리고 둔함'}},
+    {a:{w:'罵倒',r:'매도',m:'욕하며 꾸짖음'}, b:{w:'稱讚',r:'칭찬',m:'칭찬함'}},
+    {a:{w:'詰難',r:'힐난',m:'트집 잡아 따짐'}, b:{w:'稱讚',r:'칭찬',m:'칭찬함'}},
+    {a:{w:'唐慌',r:'당황',m:'어찌할 줄 몰라 허둥댐'}, b:{w:'泰然',r:'태연',m:'의연하고 침착함'}},
+    {a:{w:'咀呪',r:'저주',m:'남이 재앙을 받기 바람'}, b:{w:'祝賀',r:'축하',m:'경사를 빎'}},
+    {a:{w:'演繹',r:'연역',m:'일반→특수 추론'}, b:{w:'歸納',r:'귀납',m:'특수→일반 추론'}},
+    {a:{w:'鎭靜',r:'진정',m:'가라앉히어 조용하게 함'}, b:{w:'興奮',r:'흥분',m:'감정이 격해짐'}},
+    {a:{w:'欽慕',r:'흠모',m:'공경하며 사모함'}, b:{w:'輕蔑',r:'경멸',m:'업신여김'}},
+    {a:{w:'矮小',r:'왜소',m:'키 작고 몸집이 작음'}, b:{w:'健壯',r:'건장',m:'크고 튼튼함'}},
+    {a:{w:'柔軟',r:'유연',m:'부드럽고 유연함'}, b:{w:'剛健',r:'강건',m:'굳세고 건장함'}},
+    {a:{w:'未洽',r:'미흡',m:'아직 만족스럽지 못함'}, b:{w:'滿足',r:'만족',m:'충분히 충족됨'}},
+    {a:{w:'持續',r:'지속',m:'계속 이어짐'}, b:{w:'間歇',r:'간헐',m:'끊겼다 이어졌다 반복'}},
+    {a:{w:'駁雜',r:'박잡',m:'이것저것 섞여 순수하지 않음'}, b:{w:'純粹',r:'순수',m:'섞임 없이 깨끗함'}},
+    {a:{w:'纖弱',r:'섬약',m:'가냘프고 약함'}, b:{w:'强靭',r:'강인',m:'굳세고 질김'}},
+    {a:{w:'衰頹',r:'쇠퇴',m:'기세·세력이 약해짐'}, b:{w:'成長',r:'성장',m:'자라고 커짐'}},
+    {a:{w:'奢侈',r:'사치',m:'필요 이상으로 씀'}, b:{w:'儉素',r:'검소',m:'검약하고 소박함'}},
+    {a:{w:'銳利',r:'예리',m:'날카로움'}, b:{w:'鈍濁',r:'둔탁',m:'무디고 탁함'}},
+    {a:{w:'隱蔽',r:'은폐',m:'감추고 숨김'}, b:{w:'暴露',r:'폭로',m:'드러냄'}},
+    {a:{w:'纏縛',r:'전박',m:'얽매임'}, b:{w:'解脫',r:'해탈',m:'벗어남'}},
+    {a:{w:'訥言',r:'눌언',m:'말을 더듬거림'}, b:{w:'達辯',r:'달변',m:'말을 잘함'}},
+    {a:{w:'冒瀆',r:'모독',m:'업신여기고 더럽힘'}, b:{w:'尊重',r:'존중',m:'높이 대접함'}},
+    {a:{w:'粗雜',r:'조잡',m:'거칠고 엉성함'}, b:{w:'精密',r:'정밀',m:'가늘고 촘촘함'}},
+    {a:{w:'穿鑿',r:'천착',m:'깊이 파고들어 연구함'}, b:{w:'看過',r:'간과',m:'대충 넘겨버림'}},
+    {a:{w:'妖艶',r:'요염',m:'요사하고 아리따움'}, b:{w:'貞淑',r:'정숙',m:'정결하고 얌전함'}},
+  ]
+},
+
+multi: {
+  name: '2영역 · 다음자',
+  color: '#7a9e6a',
+  sub: '같은 한자, 다른 음',
+  cards: [
+    {char:'龜',readings:[{sound:'귀',meaning:'거북',words:'靈龜·龜甲·龜船·龜趺·龜頭'},{sound:'균',meaning:'터질',words:'龜裂·龜坼(균탁)'},{sound:'구',meaning:'땅이름',words:'龜尾·龜浦·龜山·龜旨歌'}],tip:'龜裂(균열)만 균! 나머지 귀'},
+    {char:'暴',readings:[{sound:'폭',meaning:'사나울',words:'暴暑·暴飮·暴風·暴騰·暴露·暴力'},{sound:'포',meaning:'포학',words:'暴虐(포학)만 예외'}],tip:'暴虐(포학)만 포! 나머지 폭'},
+    {char:'度',readings:[{sound:'도',meaning:'법도·정도',words:'度矩·度脫·頻度·制度·程度'},{sound:'탁',meaning:'헤아릴',words:'忖度(촌탁)만 예외'}],tip:'忖度(촌탁)만 탁! 나머지 도'},
+    {char:'識',readings:[{sound:'식',meaning:'알다',words:'識別·博識·識見·識慮'},{sound:'지',meaning:'기록할',words:'標識(표지)만 예외'}],tip:'標識(표지)만 지! 나머지 식'},
+    {char:'契',readings:[{sound:'계',meaning:'맺을',words:'契機·契狀·契兄·契盟·契約'},{sound:'결',meaning:'애쓸',words:'契闊(결활)만 예외'}],tip:'契闊(결활)만 결! 나머지 계'},
+    {char:'索',readings:[{sound:'색',meaning:'찾을',words:'索引·檢索·摸索·索出·索隱'},{sound:'삭',meaning:'동아줄·쓸쓸',words:'索莫·索綯·索然·索居'}],tip:'索莫/索然=삭막/삭연'},
+    {char:'推',readings:[{sound:'추',meaning:'밀다',words:'推進·推定·推薦·推戴·推尋'},{sound:'퇴',meaning:'퇴고',words:'推敲(퇴고)만 예외'}],tip:'推敲(퇴고)만 퇴! 나머지 추'},
+    {char:'射',readings:[{sound:'사',meaning:'쏠',words:'射手·射獵·速射'},{sound:'역',meaning:'싫어할',words:'無射(무역)'},{sound:'야',meaning:'벼슬',words:'僕射(복야)'}],tip:'무역(無射), 복야(僕射) 단어째로 암기'},
+    {char:'樂',readings:[{sound:'락/낙',meaning:'즐길',words:'樂觀·樂園·樂天·樂勝'},{sound:'악',meaning:'음악',words:'聲樂·音樂·樂器'}],tip:'즐길 때=락, 음악=악'},
+    {char:'洞',readings:[{sound:'통',meaning:'밝을',words:'洞察·洞觀·洞燭·洞泄'},{sound:'동',meaning:'골·마을',words:'洞窟·洞里'}],tip:'통찰(洞察)처럼 꿰뚫어 볼 때=통'},
+    {char:'塞',readings:[{sound:'색',meaning:'막힐',words:'窮塞·閉塞·氣塞·窒塞'},{sound:'새',meaning:'변방',words:'堅塞·要塞·塞翁之馬'}],tip:'변방·요새일 때=새, 막힐 때=색'},
+    {char:'惡',readings:[{sound:'악',meaning:'악할',words:'邪惡·惡魔·惡黨·醜惡'},{sound:'오',meaning:'미워할',words:'憎惡·嫌惡·羞惡'}],tip:'미워함(憎惡/嫌惡)=오, 나쁨=악'},
+    {char:'拓',readings:[{sound:'척',meaning:'개척',words:'開拓·干拓·拓土·拓地'},{sound:'탁',meaning:'밀칠',words:'拓本·手拓'}],tip:'拓本(탁본)만 탁! 개척 관련=척'},
+    {char:'行',readings:[{sound:'행',meaning:'다닐·행동',words:'行動·行列·旅行'},{sound:'항',meaning:'항렬',words:'行列(항렬)·行伍(항오)'}],tip:'항렬·대오 의미일 때=항'},
+  ]
+},
+
+blank: {
+  name: '2영역 · 빈칸공통',
+  color: '#2e6e50',
+  sub: '□에 공통으로 들어갈 한자',
+  cards: [
+    {target:'揷(삽)',meaning:'꽂을',examples:['□入 → 揷入(삽입)','□匙 → 揷匙(삽시)','揷話 → 삽화'],tip:'揷(삽)=꽂다·끼우다'},
+    {target:'迷(미)',meaning:'미혹할',examples:['昏□ → 昏迷(혼미)','□惑 → 迷惑(미혹)','□夢 → 迷夢(미몽)'],tip:'迷(미)=헤매다·미혹하다'},
+    {target:'護(호)',meaning:'도울',examples:['掩□ → 掩護(엄호)','擁□ → 擁護(옹호)','□喪 → 護喪(호상)'],tip:'護(호)=지키다·돕다'},
+    {target:'刪(산)',meaning:'깎을',examples:['□削 → 刪削(산삭)','□定 → 刪定(산정)','改□ → 改刪(개산)'],tip:'刪(산)=지우다·삭제하다'},
+    {target:'噴(분)',meaning:'뿜을',examples:['□射 → 噴射(분사)','□霧 → 噴霧(분무)','□火 → 噴火(분화)'],tip:'噴(분)=뿜다'},
+    {target:'拔(발)',meaning:'뽑을',examples:['□擢 → 拔擢(발탁)','選□ → 選拔(선발)','簡□ → 簡拔(간발)'],tip:'拔(발)=뽑다·선발하다'},
+    {target:'毒(독)',meaning:'독',examples:['酷□ → 酷毒(혹독)','□舌 → 毒舌(독설)','□素 → 毒素(독소)'],tip:'毒(독)=독·해롭다'},
+    {target:'滅(멸)',meaning:'다할',examples:['撲□ → 撲滅(박멸)','湮□ → 湮滅(인멸)','□裂 → 滅裂(멸렬)'],tip:'滅(멸)=없애다·멸하다'},
+    {target:'骸(해)',meaning:'뼈',examples:['遺□ → 遺骸(유해)','殘□ → 殘骸(잔해)','□骨 → 骸骨(해골)'],tip:'骸(해)=뼈·시체'},
+    {target:'暴(폭/포)',meaning:'사나울',examples:['□露 → 暴露(폭로)','□虐 → 暴虐(포학)','□騰 → 暴騰(폭등)'],tip:'暴虐만 포(포학), 나머지 폭'},
+    {target:'鍛(단)',meaning:'쇠불릴',examples:['□鍊 → 鍛鍊(단련)','□冶 → 鍛冶(단야)','□金 → 鍛金(단금)'],tip:'鍛(단)=쇠를 불리다·단련하다'},
+    {target:'殖(식)',meaning:'불릴',examples:['□産 → 殖産(식산)','繁□ → 繁殖(번식)','增□ → 增殖(증식)'],tip:'殖(식)=불리다·번식하다'},
+    {target:'網(망)',meaning:'그물',examples:['□膜 → 網膜(망막)','漁□ → 漁網(어망)','□羅 → 網羅(망라)'],tip:'網(망)=그물'},
+    {target:'糖(당)',meaning:'사탕',examples:['血□ → 血糖(혈당)','砂□ → 砂糖(사탕)','製□ → 製糖(제당)'],tip:'血糖·砂糖·製糖 세트로 암기'},
+    {target:'蓄(축)',meaning:'모을',examples:['□膿 → 蓄膿(축농)','貯□ → 貯蓄(저축)','蘊□ → 蘊蓄(온축)'],tip:'蓄(축)=쌓다·저장하다'},
+    {target:'悖(패)',meaning:'거스를',examples:['□習 → 悖習(패습)','□倫 → 悖倫(패륜)','行□ → 행패'],tip:'悖(패)=어기다·거스르다'},
+    {target:'惶(황)',meaning:'두려울',examples:['□悚 → 惶悚(황송)','驚□ → 驚惶(경황)','唐□ → 唐惶(당황)'],tip:'惶(황)=두렵다'},
+    {target:'畓(답)',meaning:'논',examples:['沃□ → 沃畓(옥답)','田□ → 田畓(전답)','墓□ → 묘답'],tip:'畓(답)=논. 田畓(전답)=밭과 논'},
+    {target:'謫(적)',meaning:'귀양갈',examples:['□降 → 謫降(적강)','貶□ → 貶謫(폄적)','□仙 → 謫仙(적선)'],tip:'謫仙=이태백 별명'},
+    {target:'矜(긍)',meaning:'자랑할',examples:['□誇 → 矜誇(긍과)','□持 → 矜持(긍지)','自□ → 自矜(자긍)'],tip:'矜持(긍지)=자부심'},
+    {target:'宦(환)',meaning:'벼슬',examples:['□路 → 宦路(환로)','仕□ → 仕宦(사환)','□厄 → 宦厄(환액)'],tip:'宦(환)=벼슬·환관'},
+    {target:'閨(규)',meaning:'규방',examples:['□怨 → 閨怨(규원)','□門 → 閨門(규문)','□秀 → 閨秀(규수)'],tip:'閨秀(규수)=재주 있는 여성'},
+    {target:'撫(무)',meaning:'어루만질',examples:['賑□ → 賑撫(진무)','宣□ → 宣撫(선무)','□摩 → 撫摩(무마)'],tip:'撫(무)=어루만지다·달래다'},
+    {target:'逐(축)',meaning:'쫓을',examples:['角□ → 角逐(각축)','放□ → 放逐(방축)','□斥 → 逐斥(축척)'],tip:'角逐(각축)=서로 다투며 쫓음'},
+    {target:'拉(랍)',meaning:'끌',examples:['被□ → 被拉(피랍)','□致 → 拉致(납치)','□北 → 拉北(납북)'],tip:'拉(랍/납)=끌어당기다'},
+    {target:'彫(조)',meaning:'새길',examples:['□刻 → 彫刻(조각)','□琢 → 彫琢(조탁)','□像 → 彫像(조상)'],tip:'彫(조)=새기다·조각하다'},
+    {target:'諷(풍)',meaning:'풍자할',examples:['□諫 → 諷諫(풍간)','□諭 → 諷諭(풍유)','□謠 → 諷謠(풍요)'],tip:'諷(풍)=돌려서 말하다'},
+  ]
+},
+
+dokhai: {
+  name: '3영역 · 독해어휘',
+  color: '#8a9238',
+  sub: '문장 속 한자어 음·뜻',
+  cards: [
+    {sentence:'사또의 명에 따라 죄인을 여주 [官衙]로 압송하겠습니다.',target:'官衙',ans:'관아',meaning:'관청',note:'官(관)=벼슬, 衙(아)=관청'},
+    {sentence:'여름에는 [遮陽]이 있는 모자를 써야 한다.',target:'遮陽',ans:'차양',meaning:'햇볕을 가리는 것',note:'遮(차)=막다, 陽(양)=햇볕'},
+    {sentence:'누가 주도권을 [掌握]하느냐에 달려 있다.',target:'掌握',ans:'장악',meaning:'손아귀에 넣어 지배함',note:'掌(장)=손바닥, 握(악)=쥐다'},
+    {sentence:'그는 진리를 [喝破]했다.',target:'喝破',ans:'갈파',meaning:'날카롭게 설파함',note:'喝(갈)=외치다, 破(파)=깨다'},
+    {sentence:'관중들은 [揶揄]를 보냈다.',target:'揶揄',ans:'야유',meaning:'빈정거려 놀림',note:'揶揄(야유)=조롱'},
+    {sentence:'여러 어르신들께 [悚懼]스럽습니다.',target:'悚懼',ans:'송구',meaning:'두렵고 미안함',note:'悚(송)=두려울, 懼(구)=두려울'},
+    {sentence:'법당에는 [脇侍] 보살 자리도 비어 있었다.',target:'脇侍',ans:'협시',meaning:'본존불 좌우의 보살',note:'脇(협)=옆구리, 侍(시)=모시다'},
+    {sentence:'썩히면 [醱酵]하는 것이 세상의 이치다.',target:'醱酵',ans:'발효',meaning:'미생물 작용으로 변화',note:'醱(발)=술이 됨, 酵(효)=누룩'},
+    {sentence:'[濊貊]족은 만주에서 수렵과 목축을 주로 하였다.',target:'濊貊',ans:'예맥',meaning:'한반도 고대 종족',note:'濊(예)·貊(맥)=고대 종족명'},
+    {sentence:'붉은 앵두가 [濃艶]하게 익었다.',target:'濃艶',ans:'농염',meaning:'짙고 요염함',note:'濃(농)=짙을, 艶(염)=요염할'},
+    {sentence:'그는 [膈膜] 손상으로 병원에 입원했다.',target:'膈膜',ans:'격막',meaning:'횡격막',note:'膈(격)=가로막, 膜(막)=막'},
+    {sentence:'왕은 [詔勅]을 내려 밀매를 금지했다.',target:'詔勅',ans:'조칙',meaning:'임금의 명령서',note:'詔(조)=고할, 勅(칙)=경계할'},
+    {sentence:'오랜 [煩悶] 끝에 어려운 결정을 내렸다.',target:'煩悶',ans:'번민',meaning:'속을 태우고 괴로워함',note:'煩(번)=번거로울, 悶(민)=답답할'},
+    {sentence:'갖가지 폐단을 [剔抉]하는 일을 과제로 삼았다.',target:'剔抉',ans:'척결',meaning:'살을 도려내고 뼈를 발라냄',note:'剔(척)=살발라낼, 抉(결)=도려낼'},
+    {sentence:'보수파와 개혁파 사이에 [軋轢]이 심하다.',target:'軋轢',ans:'알력',meaning:'서로 으르대고 충돌함',note:'軋(알)=삐걱, 轢(력)=밟을'},
+    {sentence:'인터넷 게시판이 그의 글로 [塗褙]가 되어 있다.',target:'塗褙',ans:'도배',meaning:'온통 뒤덮음',note:'塗(도)=바를, 褙(배)=배접'},
+    {sentence:'시민들은 아낌없는 [喝采]를 보냈다.',target:'喝采',ans:'갈채',meaning:'큰 소리로 칭찬함',note:'喝(갈)=외칠, 采(채)=빛날'},
+    {sentence:'올해 [浚渫] 공사가 완료될 예정이다.',target:'浚渫',ans:'준설',meaning:'강바닥의 흙 파내기',note:'浚(준)=깊게팔, 渫(설)=흙제거'},
+    {sentence:'[庇護]를 받지 않고는 일어날 수 없는 사건이다.',target:'庇護',ans:'비호',meaning:'감싸고 보호함',note:'庇(비)=감쌀, 護(호)=지킬'},
+    {sentence:'저 둘은 같은 [範疇]에 속한다.',target:'範疇',ans:'범주',meaning:'동일 성질의 부류·범위',note:'範(범)=법, 疇(주)=같은 무리'},
+    {sentence:'그와는 오래 [隔阻]하여 이제는 서먹하다.',target:'隔阻',ans:'격조',meaning:'멀리 떨어져 통하지 못함',note:'隔(격)=사이뜰, 阻(저)=막힐'},
+    {sentence:'[抽籤]을 통해 결정된다.',target:'抽籤',ans:'추첨',meaning:'제비를 뽑음',note:'抽(추)=뽑을, 籤(첨)=제비'},
+    {sentence:'어두운 곳에 들어서자 [瞳孔]이 커졌다.',target:'瞳孔',ans:'동공',meaning:'눈동자의 중심 구멍',note:'瞳(동)=눈동자, 孔(공)=구멍'},
+    {sentence:'승진에 몇 번 떨어지자 가슴에 [鬱憤]이 쌓였다.',target:'鬱憤',ans:'울분',meaning:'답답하고 분함',note:'鬱(울)=답답할, 憤(분)=분할'},
+    {sentence:'시인은 비유법을 [驅使]하여 표현한다.',target:'驅使',ans:'구사',meaning:'마음대로 부림',note:'驅(구)=몰다, 使(사)=부리다'},
+    {sentence:'공로와 과실은 공평하게 [褒貶]되어야 한다.',target:'褒貶',ans:'포폄',meaning:'칭찬과 비판으로 평가',note:'褒(포)=기릴, 貶(폄)=낮출'},
+    {sentence:'분수에서 떨어지는 [泡沫]을 바라보았다.',target:'泡沫',ans:'포말',meaning:'물거품',note:'泡(포)=거품, 沫(말)=거품'},
+    {sentence:'번역 일을 [囑託]했다.',target:'囑託',ans:'촉탁',meaning:'일을 부탁하여 맡김',note:'囑(촉)=부탁할, 託(탁)=맡길'},
+    {sentence:'할아버지의 연세는 [白壽]이시다.',target:'白壽',ans:'백수 (99세)',meaning:'百-一=白, 99세',note:'百(100)에서 一(1)을 빼면 白'},
+    {sentence:'참모들의 [輔弼]을 받고 승승장구하고 있다.',target:'輔弼',ans:'보필',meaning:'윗사람의 일을 도와줌',note:'輔(보)=도울, 弼(필)=도울'},
+    {sentence:'경제 성장은 양적 [膨脹]보다 질적 성장을 이뤄야 한다.',target:'膨脹',ans:'팽창',meaning:'부풀어 커짐',note:'膨(팽)=부풀, 脹(창)=부풀'},
+    {sentence:'사람들은 그를 기회주의자라고 [罵倒]했다.',target:'罵倒',ans:'매도',meaning:'욕하며 꾸짖어 넘어뜨림',note:'罵(매)=꾸짖을, 倒(도)=넘어질'},
+    {sentence:'두 사람에 소문이 [狼藉]해지자 야반도주를 했다.',target:'狼藉',ans:'낭자',meaning:'어지럽게 흩어짐',note:'狼(랑)=이리, 藉(자)=깔'},
+    {sentence:'[梵唄]는 불교 의식 음악이다.',target:'梵唄',ans:'범패',meaning:'불교 의식에서 부르는 노래',note:'梵(범)=범어, 唄(패)=노래'},
+    {sentence:'[駱駝] 고기를 먹은 적 있다.',target:'駱駝',ans:'낙타',meaning:'사막의 동물',note:'駱(낙)·駝(타)=낙타'},
+    {sentence:'얼굴에 [斑點]이 돋아나 있었다.',target:'斑點',ans:'반점',meaning:'얼룩얼룩한 점',note:'斑(반)=얼룩, 點(점)=점'},
+    {sentence:'그의 독려가 훈련에 도움이 되었다. → 한자는?',target:'督勵',ans:'독려',meaning:'감독하여 격려함',note:'督(독)=감독, 勵(려)=힘쓸'},
+    {sentence:'[捕虜]들이 탈출에 성공했다.',target:'捕虜',ans:'포로',meaning:'전쟁에서 잡힌 사람',note:'捕(포)=잡을, 虜(로)=사로잡을'},
+    {sentence:'[粘液]은 표면이 건조해지는 것을 막는다.',target:'粘液',ans:'점액',meaning:'끈적끈적한 액체',note:'粘(점)=끈끈할, 液(액)=진'},
+    {sentence:'얼굴을 감싸며 소리를 죽인 [嗚咽]에 잠겼다.',target:'嗚咽',ans:'오열',meaning:'슬프게 목이 메어 욺',note:'汚咽(X)·嗚裂(X)·嗚咽(O)'},
+    {sentence:'그의 [憔悴]한 모습에서 궁곤한 생활을 엿볼 수 있었다.',target:'憔悴',ans:'초췌',meaning:'몸이 파리하고 수척함',note:'蕉萃(X)·憔悴(O)'},
+    {sentence:'경건한 자세로 묵념을 올렸다. → 경건 한자?',target:'敬虔',ans:'경건',meaning:'공경스럽고 정성스러움',note:'敬健(X)·警虔(X)·敬虔(O)'},
+    {sentence:'아직도 [潔癖]이 남아 있다니 놀랍군.',target:'潔癖',ans:'결벽',meaning:'깨끗함에 병적으로 집착함',note:'潔闢(X)·缺癖(X)·潔癖(O)'},
+    {sentence:'한방에서 [覆盆子]는 피로 회복에 좋다.',target:'覆盆子',ans:'복분자',meaning:'산딸기의 일종',note:'腹盆子(X)·覆粉子(X)·覆盆子(O)'},
+    {sentence:'서해안 무장간첩을 새벽에 [生捕]하였다. → 간첩을 한자로?',target:'間諜',ans:'간첩',meaning:'적의 정보를 빼내는 첩자',note:'間牒(X)·簡諜(X)·間諜(O)'},
+    {sentence:'그의 초췌한 모습에서 궁곤한 생활을 엿볼 수 있었다. → 궁곤을 한자로?',target:'窮困',ans:'궁곤',meaning:'몹시 가난하고 어려움',note:'窮(궁)=다할, 困(곤)=어려울'},
+    {sentence:'[咆哮]하는 짐승 소리가 들렸다.',target:'咆哮',ans:'포효',meaning:'짐승이 울부짖음',note:'咆(포)=부르짖을, 哮(효)=울부짖을'},
+    {sentence:'[貰房]에 살고 있다.',target:'貰房',ans:'세방',meaning:'세를 내고 빌려 쓰는 방',note:'貰(세)=세놓을, 房(방)=방'},
+    {sentence:'[嚬蹙]을 사다.',target:'嚬蹙',ans:'빈축',meaning:'눈살을 찌푸리고 얼굴을 찡그림',note:'남들로부터 받는 비난·미움'},
+    {sentence:'[坦腹]하고 편히 누웠다.',target:'坦腹',ans:'탄복',meaning:'배를 드러내고 편히 누움',note:'坦(탄)=평탄할, 腹(복)=배'},
+  ]
+}
+};
+// ══════════════════════════════════════════
+//  DECK META
+// ══════════════════════════════════════════
+const DECK_META = {
+  all:      { label: '전체',   icon: '⊞', color: '#111110' },
+  yumhun:   { label: '음훈',   icon: '字', color: '#4272b8' },
+  yuuii:    { label: '유의어', icon: '≈',  color: '#2ea882' },
+  idiom:    { label: '사자성어',icon: '成', color: '#c09020' },
+  confused: { label: '혼동',   icon: '⚡', color: '#c25a38' },
+  antonym:  { label: '상대어', icon: '↔', color: '#2a8888' },
+  multi:    { label: '다음자', icon: '音', color: '#6e9660' },
+  blank:    { label: '빈칸',   icon: '□',  color: '#286850' },
+  dokhai:   { label: '독해',   icon: '文', color: '#848c38' },
+};
+const DECK_KEYS = Object.keys(DECK_META);
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let currentDeck = 'all';
+let currentIdx  = 0;
+let bm = JSON.parse(localStorage.getItem('hanja_bm') || '{}');
+function saveBm() { localStorage.setItem('hanja_bm', JSON.stringify(bm)); }
+
+// ══════════════════════════════════════════
+//  TABBAR
+// ══════════════════════════════════════════
+function renderTabbar() {
+  const tb = document.getElementById('tabbar');
+  tb.innerHTML = DECK_KEYS.map(k => {
+    const m = DECK_META[k];
+    const isActive = currentDeck === k;
+    return `<div class="tabbar-item" onclick="showDeck('${k}')">
+      <div class="tab-icon ${isActive ? 'active-icon' : ''}"
+           style="${isActive ? `background:${m.color}` : 'background:transparent;color:var(--text3)'}"
+      >${m.icon}</div>
+      <div class="tab-label ${isActive ? 'active-label' : ''}">${m.label}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  SHOW DECK
+// ══════════════════════════════════════════
+function showDeck(key) {
+  currentDeck = key;
+  currentIdx  = 0;
+  if (key !== 'all') {
+    const arr = DECKS[key].cards;
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+  renderTabbar();
+  document.getElementById('scrollBody').scrollTop = 0;
+  key === 'all' ? renderHome() : renderCard();
+}
+
+// ══════════════════════════════════════════
+//  HOME
+// ══════════════════════════════════════════
+function renderHome() {
+  const total = Object.values(DECKS).reduce((s,d)=>s+d.cards.length,0);
+  document.getElementById('headerCount').textContent = `총 ${total}장`;
+  const keys = Object.keys(DECKS);
+  document.getElementById('scrollBody').innerHTML = `
+    <div class="home-label" style="margin-top:4px">암기 덱</div>
+    <div class="deck-list">
+      ${keys.map(k => {
+        const d = DECKS[k];
+        const m = DECK_META[k];
+        return `<div class="deck-item" onclick="showDeck('${k}')">
+          <div class="deck-dot" style="background:${m.color}20;color:${m.color};font-size:22px">${m.icon}</div>
+          <div class="deck-info">
+            <div class="deck-name">${d.name}</div>
+            <div class="deck-sub">${d.sub}</div>
+          </div>
+          <div class="deck-count">${d.cards.length}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+//  RENDER CARD
+// ══════════════════════════════════════════
+function renderCard() {
+  const deck  = DECKS[currentDeck];
+  const card  = deck.cards[currentIdx];
+  const total = deck.cards.length;
+  const meta  = DECK_META[currentDeck];
+  const bmKey = `${currentDeck}_${currentIdx}`;
+  const isBm  = !!bm[bmKey];
+
+  document.getElementById('headerCount').textContent = `${currentIdx + 1} / ${total}`;
+
+  let cardHtml = '';
+  if      (currentDeck === 'yumhun')   cardHtml = buildYumhun(card, meta);
+  else if (currentDeck === 'yuuii')    cardHtml = buildYuuii(card, meta);
+  else if (currentDeck === 'idiom')    cardHtml = buildIdiom(card, meta);
+  else if (currentDeck === 'confused') cardHtml = buildConfused(card, meta);
+  else if (currentDeck === 'antonym')  cardHtml = buildAntonym(card, meta);
+  else if (currentDeck === 'multi')    cardHtml = buildMulti(card, meta);
+  else if (currentDeck === 'blank')    cardHtml = buildBlank(card, meta);
+  else if (currentDeck === 'dokhai')   cardHtml = buildDokhai(card, meta);
+
+  document.getElementById('scrollBody').innerHTML = `
+    <div class="card-view">
+      <div class="section-header">
+        <div class="section-dot" style="background:${meta.color}"></div>
+        <div class="section-title" style="color:${meta.color}">${deck.name}</div>
+        <div class="section-total">${currentIdx+1}<span style="font-size:13px;color:var(--text3)">/${total}</span></div>
+      </div>
+      ${cardHtml}
+      <div class="card-btns">
+        <button class="btn" onclick="go(-1)">←</button>
+        <button class="btn btn-bm ${isBm?'':''}
+          " onclick="toggleBm('${bmKey}',this)"
+          style="${isBm ? `background:${meta.color};color:#fff;border-color:${meta.color}` : ''}"
+        >${isBm ? '★' : '☆'}</button>
+        <button class="btn btn-shuffle" onclick="reshuf()">⇄</button>
+        <button class="btn primary" onclick="go(1)"
+          style="background:${meta.color};border-color:${meta.color}">다음 →</button>
+      </div>
+      <div class="prog">${deck.name}</div>
+    </div>`;
+
+  // flip
+  const fw = document.getElementById('fw');
+  if (fw) fw.onclick = () => fw.classList.toggle('flipped');
+
+  // choices
+  document.querySelectorAll('.choice-btn, .choice-btn-text').forEach(b => {
+    b.onclick = function() {
+      document.querySelectorAll('.choice-btn, .choice-btn-text').forEach(x => x.classList.remove('correct','wrong'));
+      const ok = this.dataset.correct === '1';
+      this.classList.add(ok ? 'correct' : 'wrong');
+      if (!ok) document.querySelectorAll('[data-correct="1"]').forEach(x => x.classList.add('correct'));
+    };
+  });
+}
+
+// ══════════════════════════════════════════
+//  BUILDERS
+// ══════════════════════════════════════════
+function srcBadges(sources, color) {
+  return (sources||[]).map(s =>
+    `<span class="badge" style="background:${color}20;color:${color}">${s}</span>`
+  ).join('');
+}
+
+function buildYumhun(c, meta) {
+  return `<div class="flip-wrap" id="fw">
+    <div class="flip-inner">
+      <div class="flip-front">
+        <div class="badge-row">${srcBadges(c.sources, meta.color)}</div>
+        <div>
+          <div class="char-xl" style="color:${meta.color}">${c.char}</div>
+          <div class="card-question">음(音)과 뜻은?</div>
+        </div>
+        <div class="card-tap">탭해서 확인 →</div>
+      </div>
+      <div class="flip-back">
+        <div>
+          <div class="back-char" style="color:${meta.color}">${c.char}</div>
+          <div class="back-sound">${c.sound} · ${c.meaning}</div>
+        </div>
+        <div class="back-rows">
+          <div class="back-row"><span class="back-label">부수</span>${c.radical}</div>
+          ${c.note ? `<div class="back-row"><span class="back-label">참고</span>${c.note}</div>` : ''}
+        </div>
+        <div class="badge-row">${srcBadges(c.sources, meta.color)}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildYuuii(c, meta) {
+  const charsHtml = c.chars.map(ch => `
+    <div class="yuuii-char-item">
+      <span class="yuuii-char-big" style="color:${meta.color}">${ch.c}</span>
+      <span class="yuuii-char-sound">${ch.s}</span>
+    </div>`).join('');
+  const choicesHtml = c.choices.map(ch =>
+    `<button class="choice-btn-text" data-correct="${ch===c.answer?1:0}">
+      ${ch}
+    </button>`
+  ).join('');
+  return `
+    <div class="plain-card">
+      <div class="plain-card-head">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px;font-weight:500;letter-spacing:0.06em">이 한자들의 공통 뜻은?</div>
+        <div class="yuuii-chars">${charsHtml}</div>
+      </div>
+      <div class="plain-card-body">${choicesHtml}</div>
+    </div>
+    <div class="explain"><strong>정답: ${c.answer}</strong> · ${c.note}</div>`;
+}
+
+function buildIdiom(c, meta) {
+  const chars = c.idiom.split('');
+  const display = chars.map((ch,i) =>
+    i === c.blank
+      ? `<span class="blank-sq" style="background:${meta.color}"></span>`
+      : ch
+  ).join('');
+  const choices = c.choices.map(ch =>
+    `<button class="choice-btn" data-correct="${ch===c.blankChar?1:0}">${ch}</button>`
+  ).join('');
+  return `
+    <div class="plain-card">
+      <div class="plain-card-head">
+        <div class="idiom-chars">${display}</div>
+        <div class="idiom-meaning">${c.meaning}</div>
+      </div>
+      <div class="plain-card-body">
+        <div class="choice-grid">${choices}</div>
+      </div>
+    </div>
+    <div class="explain"><strong>정답: ${c.blankChar}</strong> — ${c.note}</div>`;
+}
+
+function buildConfused(c, meta) {
+  const aHtml = c.ansChars.map(ch => `
+    <div class="hcell ok">
+      <div class="hcell-char ok">${ch.c}</div>
+      <div class="hcell-sound ok">${ch.s} · ${ch.m}</div>
+      <div class="hcell-note ok">${ch.note}</div>
+    </div>`).join('');
+  const wHtml = c.wrongChars.map(ch => `
+    <div class="hcell ng">
+      <div class="hcell-char ng">${ch.c}</div>
+      <div class="hcell-sound ng">${ch.s} · ${ch.m}</div>
+      <div class="hcell-note ng">${ch.note}</div>
+    </div>`).join('');
+  return `
+    <div class="plain-card">
+      <div class="plain-card-head">
+        <div style="font-size:22px;font-weight:700">${c.word}</div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <span class="badge" style="background:#e0f5ee;color:var(--forest)">정답 ${c.ans}</span>
+          <span class="badge" style="background:#faeae6;color:var(--terra)">오답 ${c.wrong}</span>
+        </div>
+      </div>
+      <div class="plain-card-body">
+        <div class="confused-grid">${aHtml}${wHtml}</div>
+      </div>
+    </div>
+    <div class="explain">${c.explain}</div>`;
+}
+
+function buildAntonym(c, meta) {
+  return `
+    <div class="plain-card">
+      <div class="plain-card-head">
+        <div style="font-size:11px;color:var(--text3);font-weight:500;letter-spacing:0.06em">반의어 쌍</div>
+        <div class="ant-pair">
+          <div class="ant-word">
+            <div class="ant-hanja" style="color:${meta.color}">${c.a.w}</div>
+            <div class="ant-read">${c.a.r}</div>
+            <div class="ant-meaning">${c.a.m}</div>
+          </div>
+          <div class="ant-arrow">↔</div>
+          <div class="ant-word" style="text-align:right">
+            <div class="ant-hanja" style="color:var(--forest)">${c.b.w}</div>
+            <div class="ant-read">${c.b.r}</div>
+            <div class="ant-meaning">${c.b.m}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function buildMulti(c, meta) {
+  const rows = c.readings.map((r,i) => `
+    <div class="multi-row">
+      <div class="multi-sound" style="color:${i===0?meta.color:'var(--text2)'}">${r.sound} <span style="font-weight:400;font-size:12px;color:var(--text3)">· ${r.meaning}</span></div>
+      <div class="multi-words">${r.words}</div>
+    </div>`).join('');
+  return `
+    <div class="plain-card">
+      <div class="plain-card-head">
+        <div class="multi-char-hero" style="color:${meta.color}">${c.char}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;font-weight:500;letter-spacing:0.06em">같은 한자, 다른 음</div>
+      </div>
+      <div class="plain-card-body">
+        <div class="multi-rows">${rows}</div>
+      </div>
+    </div>
+    <div class="explain">${c.tip}</div>`;
+}
+
+function buildBlank(c, meta) {
+  const exs = c.examples.map(e => {
+    const p = e.split('→');
+    return `<div class="blank-ex-row">
+      <span class="blank-ex-key">${p[0]}</span>
+      <span>→ ${(p[1]||'').trim()}</span>
+    </div>`;
+  }).join('');
+  return `
+    <div class="plain-card">
+      <div class="plain-card-head">
+        <div class="blank-hero" style="color:${meta.color}">${c.target}</div>
+        <div class="blank-meaning-text">${c.meaning}</div>
+      </div>
+      <div class="plain-card-body">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px;font-weight:500;letter-spacing:0.06em">예시 단어</div>
+        <div class="blank-ex-list">${exs}</div>
+      </div>
+    </div>
+    <div class="explain">${c.tip}</div>`;
+}
+
+function buildDokhai(c, meta) {
+  const sent = c.sentence.replace(/\[([^\]]+)\]/g,
+    `<span class="dokhai-hl">$1</span>`);
+  return `<div class="flip-wrap" id="fw">
+    <div class="flip-inner">
+      <div class="flip-front">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;color:${meta.color}">독해 어휘</div>
+        <div class="dokhai-sentence">${sent}</div>
+        <div class="card-tap">탭해서 확인 →</div>
+      </div>
+      <div class="flip-back">
+        <div>
+          <div class="dokhai-answer" style="color:${meta.color}">${c.target}</div>
+          <div class="dokhai-read">${c.ans}</div>
+        </div>
+        <div>
+          <div class="dokhai-meaning">${c.meaning}</div>
+          <div class="explain" style="margin-top:8px">${c.note}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+//  NAV
+// ══════════════════════════════════════════
+function go(dir) {
+  const total = DECKS[currentDeck].cards.length;
+  currentIdx = Math.max(0, Math.min(total - 1, currentIdx + dir));
+  document.getElementById('scrollBody').scrollTop = 0;
+  renderCard();
+}
+
+function reshuf() {
+  const arr = DECKS[currentDeck].cards;
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  currentIdx = 0;
+  renderCard();
+}
+
+function toggleBm(key, el) {
+  bm[key] ? delete bm[key] : bm[key] = true;
+  saveBm();
+  renderCard();
+}
+
+// ── init ──
+renderTabbar();
+renderHome();
+</script>
+</body>
+</html>
